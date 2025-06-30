@@ -4,11 +4,11 @@ import { Stack } from "expo-router";
 
 
 export default function RootLayout() {
- const [loaded] = useFonts({
+  const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
-    if (!loaded) {
+  if (!loaded) {
     // Async font loading only occurs in development.
     return null;
   }
@@ -16,7 +16,9 @@ export default function RootLayout() {
 
   return (
     <SafeScreen>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
     </SafeScreen>
   )
 }

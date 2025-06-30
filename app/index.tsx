@@ -1,16 +1,20 @@
 import { COLORS } from "@/constants/Color";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
+import { useRouter } from "expo-router";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 
 export default function Index() {
+
+  const router = useRouter();
+
   return (
     <View
       style={styles.container}
     >
       <Image source={require("../assets/images/get-started.svg")} style={styles.image} />
       <Text style={styles.mainText}>Effortless financial management at your fingertips</Text>
-      <TouchableOpacity style={styles.button} >
+      <TouchableOpacity style={styles.button} onPress={() => router.push("/sign-up")}>
         <Text style={styles.text}>Get Started</Text>
         <Ionicons name="arrow-forward-circle" size={24} color="white" />
       </TouchableOpacity>
