@@ -4,20 +4,25 @@ import {
     View,
     StyleSheet,
     Pressable,
-    Platform,
+    Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import React, { useState } from "react";
+import AddExpenseModal from "./create";
 
-function CustomTabBar({ state, descriptors, navigation }: any) {
-
+function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
     return (
         <View style={styles.container}>
             <View style={styles.tabBar}>
                 {state.routes.map((route: any, index: number) => {
-                    const { options } = descriptors[route.key];
                     const isFocused = state.index === index;
 
                     const onPress = () => {
+                        if (route.name === "create") {
+                            onCreatePress?.(); // 🔥 trigger modal instead of navigating
+                            return;
+                        }
+
                         const event = navigation.emit({
                             type: "tabPress",
                             target: route.key,
@@ -31,10 +36,10 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
 
                     let iconName: any = "circle-outline";
                     switch (route.name) {
-                        case "index":
+                        case "create":
                             iconName = "plus";
                             break;
-                        case "create":
+                        case "index":
                             iconName = isFocused ? "home" : "home-outline";
                             break;
                         case "insights":
@@ -42,7 +47,7 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
                             break;
                     }
 
-                    const isHome = route.name === "index";
+                    const isHome = route.name === "create";
 
                     return (
                         <Pressable
@@ -85,6 +90,80 @@ function CustomTabBar({ state, descriptors, navigation }: any) {
     );
 }
 
+
+
+// 👇 This is your actual layout function
+export default function TabLayout() {
+    const [modalVisible, setModalVisible] = useState(false);
+
+    return (
+        <>
+            <Tabs
+                screenOptions={{
+                    headerShown: false,
+                }}
+                tabBar={(props) => (
+                    <CustomTabBar {...props} onCreatePress={() => setModalVisible(true)} />
+                )}
+            >
+                <Tabs.Screen
+                    name="index"
+                    options={{
+                        title: "Home",
+                    }}
+                />
+                <Tabs.Screen
+                    name="create"
+                    options={{
+                        title: "create",
+                    }}
+                />
+                <Tabs.Screen
+                    name="insights"
+                    options={{
+                        title: "insights",
+                    }}
+                />
+            </Tabs>
+
+            {/* 🔥 Modal triggered by 'create' tab */}
+            <Modal
+                visible={modalVisible}
+                transparent
+                animationType="slide"
+                onRequestClose={() => setModalVisible(false)}
+            >
+                <View style={modalOverlayStyles.modalOverlay}>
+                    {/* <View style={modalOverlayStyles.modalContent}>
+                        <Text style={{ fontSize: 18 }}>This is your modal!</Text>
+                        <Pressable onPress={() => setModalVisible(false)} style={{ marginTop: 20 }}>
+                            <Text style={{ color: "blue" }}>Close</Text>
+                        </Pressable>
+                    </View> */}
+                    <AddExpenseModal  setModalVisible={setModalVisible} />
+                </View>
+            </Modal>
+        </>
+    );
+}
+
+const modalOverlayStyles = StyleSheet.create({
+    modalOverlay: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        backgroundColor: "rgba(0,0,0,0.5)",
+    },
+    modalContent: {
+        width: 300,
+        padding: 24,
+        backgroundColor: "white",
+        borderRadius: 12,
+        alignItems: "center",
+    },
+});
+
+
 const styles = StyleSheet.create({
     container: {
         backgroundColor: "white",
@@ -98,7 +177,6 @@ const styles = StyleSheet.create({
         height: 80,
         backgroundColor: "white",
         paddingHorizontal: 16,
-        paddingBottom: Platform.OS === "ios" ? 10 : 2,
     },
     tabButton: {
         flex: 1,
@@ -113,7 +191,7 @@ const styles = StyleSheet.create({
     homeIconContainer: {
         width: 68,
         height: 68,
-        borderRadius: 34,
+        borderRadius: 50,
         alignItems: "center",
         justifyContent: "center",
         shadowColor: "#000",
@@ -148,35 +226,3 @@ const styles = StyleSheet.create({
         backgroundColor: "rgba(10, 168, 126, 0.1)",
     },
 });
-
-export default function TabLayout() {
-
-
-    return (
-        <Tabs
-            screenOptions={{
-                headerShown: false,
-            }}
-            tabBar={(props) => <CustomTabBar {...props} />}
-        >
-            <Tabs.Screen
-                name="create"
-                options={{
-                    title: "Profile",
-                }}
-            />
-            <Tabs.Screen
-                name="index"
-                options={{
-                    title: "Home",
-                }}
-            />
-            <Tabs.Screen
-                name="insights"
-                options={{
-                    title: "Invites",
-                }}
-            />
-        </Tabs>
-    );
-}
