@@ -1,14 +1,15 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, Modal } from 'react-native'
 import React, { useState } from 'react'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import CategoryModal from '../(modal)/CategoryModal';
 
 
 const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<React.SetStateAction<boolean>> }) => {
   const [date, setDate] = useState(new Date());
   const [show, setShow] = useState(false);
-
-
+  const [selectedCategory, setSelectedCategory] = useState('')
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false)
 
   const onChange = (_event: any, selectedDate?: Date) => {
     setShow(Platform.OS === 'ios'); // For iOS, keep showing picker
@@ -23,55 +24,43 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
   return (
     <View style={styles.container}>
       <TouchableOpacity onPress={() => setModalVisible(false)}>
-        <MaterialIcons name='cancel' size={24} style={{
-          marginBottom: 10
-        }} />
+        <MaterialIcons name='cancel' size={24} style={{ marginBottom: 10 }} />
       </TouchableOpacity>
-      <Text style={styles.text}>Add new Expense</Text>
-      <Text style={{ fontSize: 16, color: '#666' }}>
+      <Text style={styles.headerTitle}>Add new Expense</Text>
+      <Text style={styles.headerDescription}>
         Enter the details of your expense to help you keep track of your spending.
       </Text>
-      <View style={{
-        marginTop: 20,
-      }}>
-        <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Enter Amount</Text>
+      <View style={styles.inputSection}>
+        <Text style={styles.inputLabel}>Enter Amount</Text>
         <TextInput
-          style={{
-            padding: 15,
-            marginTop: 5,
-            backgroundColor: '#f8f8ff',
-            borderRadius: 5,
-          }}
+          style={styles.inputStyle}
+          keyboardType="numeric"
+          placeholder="e.g. 100.00"
+          placeholderTextColor="#666"
         />
       </View>
-      <View style={{
-        marginTop: 20,
-      }}>
-        <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Description</Text>
+      <View style={styles.inputSection}>
+        <Text style={styles.inputLabel}>Description</Text>
         <TextInput
-          style={{
-            padding: 15,
-            marginTop: 5,
-            backgroundColor: '#f8f8ff',
-            borderRadius: 5,
-          }}
+          style={styles.inputStyle}
+          placeholder="e.g. Groceries, Rent, etc."
+          placeholderTextColor="#666"
         />
       </View>
-      <View style={{
-        marginTop: 20,
-      }}>
-        <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Category</Text>
-        <TextInput
-          style={{
-            padding: 15,
-            marginTop: 5,
-            backgroundColor: '#f8f8ff',
-            borderRadius: 5,
-          }}
-        />
+     {/* Category Select */}
+      <View style={styles.inputSection}>
+        <Text style={styles.inputLabel}>Category</Text>
+        <TouchableOpacity
+          style={styles.inputStyle}
+          onPress={() => setCategoryModalVisible(true)}
+        >
+          <Text style={{ color: selectedCategory ? '#000' : '#999' }}>
+            {selectedCategory || 'Select Category'}
+          </Text>
+        </TouchableOpacity>
       </View>
-      <View style={{ marginTop: 20 }}>
-        <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Date</Text>
+      <View style={styles.inputSection}>
+        <Text style={styles.inputLabel}>Date</Text>
 
         <TouchableOpacity onPress={showDatepicker}>
           <View style={styles.inputContainer}>
@@ -92,16 +81,20 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           />
         )}
       </View>
-      <TouchableOpacity style={{
-        marginTop: 30,
-        backgroundColor: 'black',
-        padding: 15,
-        borderRadius: 10,
-        elevation: 5,
-        alignItems: 'center',
-      }}>
-        <Text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>Add Expense</Text>
+      <TouchableOpacity style={styles.button}>
+        <Text style={styles.buttonText}>Add Expense</Text>
       </TouchableOpacity>
+      <Modal
+        visible={categoryModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setCategoryModalVisible(false)}
+      >
+          <CategoryModal
+            setCategoryModalVisible={setCategoryModalVisible}
+            setSelectedCategory={setSelectedCategory}
+          />
+      </Modal>
     </View>
   )
 }
@@ -118,10 +111,28 @@ const styles = StyleSheet.create({
     gap: 15,
     backgroundColor: '#fff',
   },
-  text: {
+  headerTitle: {
     fontSize: 20,
     color: '#333',
     fontWeight: 'bold',
+  },
+  headerDescription: {
+    fontSize: 16,
+    color: '#666'
+  },
+  inputSection: {
+    marginTop: 20,
+  },
+  inputLabel: {
+    fontSize: 15,
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  inputStyle: {
+    padding: 15,
+    marginTop: 5,
+    backgroundColor: '#f8f8ff',
+    borderRadius: 5,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -130,5 +141,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     borderRadius: 5,
     padding: 10,
+  },
+  button: {
+    marginTop: 30,
+    backgroundColor: 'black',
+    padding: 15,
+    borderRadius: 10,
+    elevation: 5,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 16, color: '#fff', fontWeight: 'bold'
   }
 })
