@@ -51,12 +51,13 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
       <View style={styles.inputSection}>
         <Text style={styles.inputLabel}>Category</Text>
         <TouchableOpacity
-          style={styles.inputStyle}
+          style={styles.inputCategoryStyle}
           onPress={() => setCategoryModalVisible(true)}
         >
           <Text style={{ color: selectedCategory ? '#000' : '#999' }}>
             {selectedCategory || 'Select Category'}
           </Text>
+          <Ionicons name="chevron-forward-circle" size={24} color="#666" style={{ marginLeft: 10 }} />
         </TouchableOpacity>
       </View>
       <View style={styles.inputSection}>
@@ -133,6 +134,15 @@ const styles = StyleSheet.create({
     marginTop: 5,
     backgroundColor: '#f8f8ff',
     borderRadius: 5,
+  },
+  inputCategoryStyle:{
+    padding: 15,
+    marginTop: 5,
+    backgroundColor: '#f8f8ff',
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   inputContainer: {
     flexDirection: 'row',

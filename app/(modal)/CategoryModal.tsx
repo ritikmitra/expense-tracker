@@ -1,7 +1,7 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { View, Text, StyleSheet, FlatList, TouchableOpacity } from 'react-native'
 
-const categories = ['Food', 'Rent', 'Transport', 'Shopping', 'Bills', 'Other']
+const categories = ['Food', 'Rent', 'Transport', 'Shopping', 'Bills', 'Entertainment', 'Health', 'Utilities', 'Travel', 'Groceries', 'Dining Out', 'Clothing', 'Education', 'Gifts', 'Subscriptions', 'Miscellaneous']
 
 
 const CategoryModal = ({ setCategoryModalVisible, setSelectedCategory }: { setCategoryModalVisible: React.Dispatch<React.SetStateAction<boolean>>, setSelectedCategory: React.Dispatch<React.SetStateAction<string>> }) => {
