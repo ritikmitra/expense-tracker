@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
+import { COLORS } from '@/constants/Color'; // Adjust the import path as necessary
 
 const Insights = () => {
   const insightsData = [
@@ -32,7 +33,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-    backgroundColor: '#f4f4f4',
+    backgroundColor: COLORS.dark.background,
   },
   heading: {
     fontSize: 24,
