@@ -8,6 +8,12 @@ const Insights = () => {
     { title: 'Sales', value: '$14,300', description: 'Total sales this month' },
     { title: 'Retention Rate', value: '88%', description: 'Retention rate in the past 30 days' },
     { title: 'Website Traffic', value: '10,000+', description: 'Website visits this week' },
+    { title: 'Conversion Rate', value: '5%', description: 'Conversion rate from clicks to sales' },
+    { title: 'Customer Satisfaction', value: '92%', description: 'Customer satisfaction score' },
+    { title: 'New Signups', value: '1,200', description: 'New users registered this month' },
+    { title: 'Feedback Received', value: '350', description: 'Feedback submissions in the last week' },
+    { title: 'Support Tickets', value: '45', description: 'Open support tickets currently' },
+    { title: 'Average Session Duration', value: '3m 45s', description: 'Average time spent on the app' },
   ];
 
   return (
