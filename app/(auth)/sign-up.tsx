@@ -1,103 +1,96 @@
 import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
-import React from 'react'
+import React, { useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router';
+import { Link, useRouter } from 'expo-router';
+
+
+type field = 'firstName' | 'lastName' | 'email' | 'password' | null;
 
 const SignUp = () => {
-
     const router = useRouter();
+    const [focusedInput, setFocusedInput] = useState<field>(null); // Track which field is focused
+
+    const getInputStyle = (name : field) => ([
+        styles.input,
+        focusedInput === name && styles.inputFocused // Apply highlight if focused
+    ]);
+
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={()=>router.back()}>
+            <TouchableOpacity onPress={() => router.back()}>
                 <MaterialIcons name='arrow-back-ios-new' size={24} style={{
-                    marginBottom: 10
+                    marginBottom: 10,
+                    transform: [{ translateX: -10 }]
                 }} />
             </TouchableOpacity>
+
             <Text style={styles.text}>Create your account</Text>
             <Text style={{ fontSize: 16, color: '#666', marginTop: 10 }}>
                 Please enter your details to create an account.
             </Text>
-            <View style={{
-                marginTop: 20,
-            }}>
-                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>First Name</Text>
+
+            {/* First Name */}
+            <View style={{ marginTop: 20 }}>
+                <Text style={styles.label}>First Name</Text>
                 <TextInput
-                    style={{
-                        padding: 10,
-                        marginTop: 5,
-                        backgroundColor: '#f8f8ff',
-                        borderRadius: 5,
-                    }}
+                    style={getInputStyle('firstName')}
+                    onFocus={() => setFocusedInput('firstName')}
+                    onBlur={() => setFocusedInput(null)}
                 />
             </View>
-            <View style={{
-                marginTop: 20,
-            }}>
-                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Last Name</Text>
+
+            {/* Last Name */}
+            <View style={{ marginTop: 20 }}>
+                <Text style={styles.label}>Last Name</Text>
                 <TextInput
-                    style={{
-                        padding: 10,
-                        marginTop: 5,
-                        backgroundColor: '#f8f8ff',
-                        borderRadius: 5,
-                    }}
+                    style={getInputStyle('lastName')}
+                    onFocus={() => setFocusedInput('lastName')}
+                    onBlur={() => setFocusedInput(null)}
                 />
             </View>
-            <View style={{
-                marginTop: 20,
-            }}>
-                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Email Address</Text>
+
+            {/* Email */}
+            <View style={{ marginTop: 20 }}>
+                <Text style={styles.label}>Email Address</Text>
                 <TextInput
-                    style={{
-                        padding: 10,
-                        marginTop: 5,
-                        backgroundColor: '#f8f8ff',
-                        borderRadius: 5,
-                    }}
+                    style={getInputStyle('email')}
+                    onFocus={() => setFocusedInput('email')}
+                    onBlur={() => setFocusedInput(null)}
                 />
             </View>
-            <View style={{
-                marginTop: 20,
-            }}>
-                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Password</Text>
+
+            {/* Password */}
+            <View style={{ marginTop: 20 }}>
+                <Text style={styles.label}>Password</Text>
                 <TextInput
-                    style={{
-                        padding: 10,
-                        marginTop: 5,
-                        backgroundColor: '#f8f8ff',
-                        borderRadius: 5,
-                    }}
+                    style={getInputStyle('password')}
                     secureTextEntry
+                    onFocus={() => setFocusedInput('password')}
+                    onBlur={() => setFocusedInput(null)}
                 />
             </View>
-            <View style={{
-                flexDirection: 'column',
-                gap: 5,
-            }}>
-                <Text style={{
-                    color: 'gray',
-                }}>alphanumeric characters </Text>
-                <Text style={{ color: 'gray' }} >1 special character</Text>
+
+            {/* Password requirements */}
+            <View style={{ flexDirection: 'column', gap: 5 }}>
+                <Text style={{ color: 'gray' }}>alphanumeric characters</Text>
+                <Text style={{ color: 'gray' }}>1 special character</Text>
                 <Text style={{ color: 'gray' }}>more than 7 characters</Text>
-                <Text style={{ color: 'gray' }}>atleast 1 capital letter</Text>
+                <Text style={{ color: 'gray' }}>at least 1 capital letter</Text>
             </View>
-            <TouchableOpacity style={{
-                marginTop: 30,
-                backgroundColor: 'black',
-                padding: 15,
-                borderRadius: 10,
-                elevation: 5,
-                alignItems: 'center',
-            }}>
+
+            {/* Create Account Button */}
+            <TouchableOpacity style={styles.button}>
                 <Text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>Create Account</Text>
             </TouchableOpacity>
+
+            {/* Login Link */}
             <View style={{
                 marginTop: 10,
                 alignItems: 'center',
                 flexDirection: 'row',
                 justifyContent: 'center',
             }}>
-                <Text>Already have an account? <Text style={{ color: 'blue' }}>Login</Text></Text>
+                <Text>Already have an account? <Link href="/(auth)/sign-in" style={{ color: 'blue' }}>Login</Link></Text>
             </View>
         </View>
     )
@@ -105,12 +98,11 @@ const SignUp = () => {
 
 export default SignUp
 
-
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 20,
-        paddingHorizontal : 25,
+        paddingHorizontal: 25,
         gap: 15,
         backgroundColor: '#fff',
     },
@@ -119,4 +111,29 @@ const styles = StyleSheet.create({
         color: '#333',
         fontWeight: 'bold',
     },
-})
+    label: {
+        fontSize: 15,
+        color: '#333',
+        fontWeight: 'bold',
+    },
+    input: {
+        padding: 10,
+        marginTop: 5,
+        backgroundColor: '#f8f8ff',
+        borderRadius: 10,
+        color: '#333',
+        borderWidth: 1,
+        borderColor: 'transparent', // Default border color
+    },
+    inputFocused: {
+        borderColor: 'black', // Blue highlight on focus
+    },
+    button: {
+        marginTop: 30,
+        backgroundColor: 'black',
+        padding: 15,
+        borderRadius: 10,
+        elevation: 5,
+        alignItems: 'center',
+    }
+});
