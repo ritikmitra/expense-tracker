@@ -1,13 +1,20 @@
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
+type field = 'email' | null;
 
 const SignIn = () => {
 
     const router = useRouter();
+    const [focusedInput, setFocusedInput] = useState<field>(null); // Track which field is focused
 
+    const getInputStyle = (name: field) => ([
+        styles.input,
+        focusedInput === name && styles.inputFocused // Apply highlight if focused
+    ]);
 
     return (
         <View style={styles.container}>
@@ -78,12 +85,9 @@ const SignIn = () => {
             }}>
                 <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Email Address</Text>
                 <TextInput
-                    style={{
-                        padding: 10,
-                        marginTop: 5,
-                        backgroundColor: '#f8f8ff',
-                        borderRadius: 5,
-                    }}
+                    style={getInputStyle('email')}
+                    onFocus={() => setFocusedInput('email')}
+                    onBlur={() => setFocusedInput(null)}
                 />
             </View>
             <TouchableOpacity style={{
@@ -110,6 +114,15 @@ const styles = StyleSheet.create({
     text: {
         fontSize: 20,
         color: "#333",
+    },
+    input: {
+        padding: 10,
+        marginTop: 5,
+        backgroundColor: '#f8f8ff',
+        borderRadius: 5,
+    },
+    inputFocused: {
+        borderColor: 'black', // Blue highlight on focus
     },
 })
 
