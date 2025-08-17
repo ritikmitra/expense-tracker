@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CategoryModal from '../(modal)/CategoryModal';
+import useExpenseStore from '@/store/useExpenseStore';
 
 
 const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<React.SetStateAction<boolean>> }) => {
@@ -10,12 +11,44 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
   const [show, setShow] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState('')
   const [categoryModalVisible, setCategoryModalVisible] = useState(false)
+  const [amount, setAmount] = useState('');
+  const [description, setDescription] = useState('');
+
+  const addExpense = useExpenseStore((state) => state.addExpense);
+
 
   const onChange = (_event: any, selectedDate?: Date) => {
-    setShow(Platform.OS === 'ios'); // For iOS, keep showing picker
+    setShow(Platform.OS === 'ios');
     if (selectedDate) {
       setDate(selectedDate);
     }
+  };
+
+  const handleAddExpense = () => {
+    if (!amount || !description || !selectedCategory) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    const parsedAmount = parseFloat(amount);
+    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+      alert('Amount must be a valid number');
+      return;
+    }
+
+    addExpense({
+      amount: parsedAmount,
+      description,
+      category: selectedCategory,
+      date: date.toISOString(),
+    });
+
+    // Reset fields and close modal
+    setAmount('');
+    setDescription('');
+    setSelectedCategory('');
+    setDate(new Date());
+    setModalVisible(false);
   };
 
   const showDatepicker = () => {
@@ -37,6 +70,8 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           keyboardType="numeric"
           placeholder="e.g. 100.00"
           placeholderTextColor="#666"
+          value={amount}
+        onChangeText={setAmount}
         />
       </View>
       <View style={styles.inputSection}>
@@ -45,9 +80,11 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           style={styles.inputStyle}
           placeholder="e.g. Groceries, Rent, etc."
           placeholderTextColor="#666"
+          value={description}
+          onChangeText={setDescription}
         />
       </View>
-     {/* Category Select */}
+      {/* Category Select */}
       <View style={styles.inputSection}>
         <Text style={styles.inputLabel}>Category</Text>
         <TouchableOpacity
@@ -82,7 +119,7 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           />
         )}
       </View>
-      <TouchableOpacity style={styles.button}>
+      <TouchableOpacity onPress={handleAddExpense} style={styles.button}>
         <Text style={styles.buttonText}>Add Expense</Text>
       </TouchableOpacity>
       <Modal
@@ -91,10 +128,10 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
         animationType="slide"
         onRequestClose={() => setCategoryModalVisible(false)}
       >
-          <CategoryModal
-            setCategoryModalVisible={setCategoryModalVisible}
-            setSelectedCategory={setSelectedCategory}
-          />
+        <CategoryModal
+          setCategoryModalVisible={setCategoryModalVisible}
+          setSelectedCategory={setSelectedCategory}
+        />
       </Modal>
     </View>
   )
@@ -135,7 +172,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8ff',
     borderRadius: 5,
   },
-  inputCategoryStyle:{
+  inputCategoryStyle: {
     padding: 15,
     marginTop: 5,
     backgroundColor: '#f8f8ff',

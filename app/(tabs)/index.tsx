@@ -1,3 +1,5 @@
+import useExpenseStore from '@/store/useExpenseStore'
+import { currentGreeting, formateTime } from '@/util/lib'
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
@@ -10,6 +12,8 @@ const Index = () => {
   const handleFilterPress = (filter: string) => {
     setActiveFilter(filter)
   }
+
+  const expenses = useExpenseStore((state) => state.expenses)
 
   const getFilterDate = () => {
     const currentDate = new Date()
@@ -37,7 +41,7 @@ const Index = () => {
       <View style={styles.header}>
         <Image source={require('../../assets/images/icon.png')} style={styles.headerImg} />
         <View style={styles.innerHeader}>
-          <Text style={styles.headerText}>Good morning, John</Text>
+          <Text style={styles.headerText}>{currentGreeting()}, John</Text>
           <Text style={styles.headerDescription}>Track your expenses, start your day right</Text>
         </View>
       </View >
@@ -64,8 +68,29 @@ const Index = () => {
       </View>
       <View style={styles.spendListContainer}>
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
-        <View style={styles.innerListContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' ,gap: 10}}>
+
+        {
+          expenses.map((expense,index) => (
+            <View key={expense.id} style={styles.innerListContainer}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
+            <View style={{ gap: 5 }}>
+              <Text style={{
+                color: '#333',
+              }}>{expense.description}</Text>
+              <Text style={{
+                color: '#666',
+                fontSize: 12,
+              }}>{formateTime(expense.date)}</Text>
+            </View>
+          </View>
+          <Text>{expense.amount}</Text>
+        </View>
+          ))
+        }
+        
+        {/* <View style={styles.innerListContainer}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
             <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
             <View style={{ gap: 5 }}>
               <Text style={{
@@ -76,9 +101,9 @@ const Index = () => {
                 fontSize: 12,
               }}>Time</Text>
             </View>
-          </View>          
+          </View>
           <Text>6,663</Text>
-        </View>
+        </View> */}
       </View>
     </View>
   )
@@ -141,10 +166,7 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
   },
   filterTextActive: {
-    fontSize: 10,
     color: '#fff',
-    padding: 10,
-    borderRadius: 15,
     backgroundColor: 'black',
   },
   spendContainer: {
@@ -181,7 +203,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8ff',
     borderRadius: 15,
     padding: 10,
-    elevation:1,
+    elevation: 1,
     justifyContent: 'space-between',
   },
 })
