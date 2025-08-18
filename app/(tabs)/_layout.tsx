@@ -77,7 +77,7 @@ function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
                                     <MaterialCommunityIcons
                                         name={iconName}
                                         size={28}
-                                        color={isFocused ? "#0AA87E" : "#666666"}
+                                        color={isFocused ? "#000000ff" : "#666666"}
                                         style={{ opacity: isFocused ? 1 : 0.7 }}
                                     />
                                 </View>
@@ -223,6 +223,6 @@ const styles = StyleSheet.create({
         height: 48,
         width: 48,
         borderRadius: 64,
-        backgroundColor: "rgba(10, 168, 126, 0.1)",
+        backgroundColor: "rgba(39, 43, 42, 0.1)",
     },
 });
