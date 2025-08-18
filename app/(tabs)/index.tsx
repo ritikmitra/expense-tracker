@@ -2,12 +2,15 @@ import useExpenseStore from '@/store/useExpenseStore'
 import { currentGreeting, formateTime } from '@/util/lib'
 import { Image } from 'expo-image'
 import React, { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import CalendarModal from '../(modal)/CalendarModal'
 
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState('Today')
 
-  const filters = ['Today', 'This Week', 'This Month', 'Calendar']
+  const filters = ['Today', 'This Week', 'This Month']
+
+  const [calendarModalVisible, setCalendarModalVisible] = useState(false)
 
   const handleFilterPress = (filter: string) => {
     setActiveFilter(filter)
@@ -29,8 +32,6 @@ const Index = () => {
         return `This Week (${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
       case 'This Month':
         return `${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
-      case 'Calendar':
-        return 'Select date range'
       default:
         return `Today, ${currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
     }
@@ -61,6 +62,13 @@ const Index = () => {
             </Text>
           </TouchableOpacity>
         ))}
+        <TouchableOpacity
+        onPress={()=>setCalendarModalVisible(true)}
+        >
+          <Text  style={styles.filterText}>
+            Calendar
+          </Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.spendContainer}>
         <Text style={styles.spendText}>Spend so far</Text>
@@ -70,41 +78,35 @@ const Index = () => {
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
 
         {
-          expenses.map((expense,index) => (
+          expenses.map((expense, index) => (
             <View key={expense.id} style={styles.innerListContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
-            <View style={{ gap: 5 }}>
-              <Text style={{
-                color: '#333',
-              }}>{expense.description}</Text>
-              <Text style={{
-                color: '#666',
-                fontSize: 12,
-              }}>{formateTime(expense.date)}</Text>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
+                <View style={{ gap: 5 }}>
+                  <Text style={{
+                    color: '#333',
+                  }}>{expense.description}</Text>
+                  <Text style={{
+                    color: '#666',
+                    fontSize: 12,
+                  }}>{formateTime(expense.date)}</Text>
+                </View>
+              </View>
+              <Text>{expense.amount}</Text>
             </View>
-          </View>
-          <Text>{expense.amount}</Text>
-        </View>
           ))
         }
-        
-        {/* <View style={styles.innerListContainer}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
-            <View style={{ gap: 5 }}>
-              <Text style={{
-                color: '#333',
-              }}>Food</Text>
-              <Text style={{
-                color: '#666',
-                fontSize: 12,
-              }}>Time</Text>
-            </View>
-          </View>
-          <Text>6,663</Text>
-        </View> */}
       </View>
+      <Modal
+        visible={calendarModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setCalendarModalVisible(false)}
+      >
+        <CalendarModal
+          setCalendarModalVisible={setCalendarModalVisible}
+        />
+      </Modal>
     </View>
   )
 }
