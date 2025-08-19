@@ -1,8 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons'
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import { useCallback, useMemo, useState, forwardRef, useRef } from 'react';
 import { Calendar, CalendarUtils } from 'react-native-calendars';
-
+import useExpenseStore from '@/store/useExpenseStore';
+import { formateTime } from '@/util/lib';
+import { Image } from 'expo-image';
 
 
 interface CalendarDay {
@@ -12,6 +14,7 @@ interface CalendarDay {
     year: number;       // e.g., 2025
     timestamp: number;  // Unix timestamp in milliseconds
 }
+const INITIAL_DATE = new Date().toISOString().split('T')[0];
 
 const CalendarModal = ({
     setCalendarModalVisible,
@@ -21,8 +24,8 @@ const CalendarModal = ({
     const formatMonth = (date: Date) => {
         return date.toLocaleString('default', { month: 'long', year: 'numeric' });
     };
-    const INITIAL_DATE = new Date().toISOString().split('T')[0]; // today's date in YYYY-MM-DD
-    console.log('Initial Date:', INITIAL_DATE);
+
+    const expenses = useExpenseStore((state) => state.expenses)
 
 
     const [selected, setSelected] = useState(INITIAL_DATE);
@@ -48,11 +51,19 @@ const CalendarModal = ({
         customHeaderProps?.current?.addMonth(add);
         setCurrentMonth(formatMonth(newMonth));
     };
+
     const moveNext = () => {
         setCustomHeaderNewMonth(true);
     };
+    
     const movePrevious = () => {
         setCustomHeaderNewMonth(false);
+    };
+
+    const getDay = () => {
+        const date = new Date(selected);
+        console.log(date);
+        return date.toLocaleDateString('en-US', { month: 'short',  year: 'numeric', weekday: 'long' });
     };
 
     const CustomHeader = forwardRef<View, any>((props, ref) => {
@@ -73,6 +84,7 @@ const CalendarModal = ({
                         <MaterialIcons name="chevron-right" size={24} />
                     </TouchableOpacity>
                 </View>
+
             </View>
         );
     });
@@ -103,16 +115,36 @@ const CalendarModal = ({
                 <Text style={styles.headerTitle}>Calendar View</Text>
             </View>
 
-            <View>
-                <Calendar
-                    customHeader={CustomHeader}
-                    style={styles.calendar}
-                    enableSwipeMonths
-                    current={INITIAL_DATE}
-                    onDayPress={onDayPress}
-                    markedDates={marked}
-                />
-            </View>
+            <Calendar
+                customHeader={CustomHeader}
+                style={styles.calendar}
+                enableSwipeMonths
+                current={INITIAL_DATE}
+                onDayPress={onDayPress}
+                markedDates={marked}
+            />
+            <ScrollView>
+                <View style={styles.spendListContainer}>
+                    <Text style={styles.filterDate}>{getDay()}</Text>
+                    {expenses.map((expense) => (
+                        <View key={expense.id} style={styles.innerListContainer}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                                <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
+                                <View style={{ gap: 5 }}>
+                                    <Text style={{
+                                        color: '#333',
+                                    }}>{expense.description}</Text>
+                                    <Text style={{
+                                        color: '#666',
+                                        fontSize: 12,
+                                    }}>{formateTime(expense.date)}</Text>
+                                </View>
+                            </View>
+                            <Text>{expense.amount}</Text>
+                        </View>
+                    ))}
+                </View>
+            </ScrollView>
         </View>
     )
 }
@@ -173,5 +205,24 @@ const styles = StyleSheet.create({
         backgroundColor: '#f5f5f5',
         borderRadius: 8,
         marginBottom: 10,
+    },
+    spendListContainer: {
+        flex: 1,
+        gap: 10,
+    },
+    innerListContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: '#f8f8ff',
+        borderRadius: 15,
+        padding: 10,
+        elevation: 1,
+        justifyContent: 'space-between',
+    },
+    filterDate: {
+        fontSize: 12,
+        color: '#666',
+        fontWeight: 'bold',
+        marginTop: 5,
     },
 })

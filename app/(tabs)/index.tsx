@@ -78,7 +78,7 @@ const Index = () => {
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
 
         {
-          expenses.map((expense, index) => (
+          expenses.map((expense) => (
             <View key={expense.id} style={styles.innerListContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
