@@ -1,9 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import { useCallback, useMemo, useState, forwardRef, useRef } from 'react';
-import { Calendar, CalendarUtils } from 'react-native-calendars';
+import { Calendar } from 'react-native-calendars';
 import useExpenseStore from '@/store/useExpenseStore';
-import { formateTime } from '@/util/lib';
+import { formateTime, getCurrencyLogo, getDeviceCurrencySymbol } from '@/util/lib';
 import { Image } from 'expo-image';
 
 
@@ -27,15 +27,19 @@ const CalendarModal = ({
 
     const expenses = useExpenseStore((state) => state.expenses)
 
+    const filterExpensesByDate = useCallback((date: string) => {
+        return expenses.filter((expense) => {
+            const expenseDate = new Date(expense.date).toISOString().split('T')[0];
+            return expenseDate === date;
+        });
+    }, [expenses]);
 
     const [selected, setSelected] = useState(INITIAL_DATE);
+
     const [currentMonth, setCurrentMonth] = useState(formatMonth(new Date()));
 
-    const getDate = (count: number) => {
-        const date = new Date(INITIAL_DATE);
-        const newDate = date.setDate(date.getDate() + count);
-        return CalendarUtils.getCalendarDateString(newDate);
-    };
+    const filteredExpenses = useMemo(() => filterExpensesByDate(selected), [filterExpensesByDate, selected]);
+
 
     const onDayPress = useCallback((day: CalendarDay) => {
         setSelected(day.dateString);
@@ -55,55 +59,88 @@ const CalendarModal = ({
     const moveNext = () => {
         setCustomHeaderNewMonth(true);
     };
-    
+
     const movePrevious = () => {
         setCustomHeaderNewMonth(false);
     };
-
     const getDay = () => {
         const date = new Date(selected);
-        console.log(date);
-        return date.toLocaleDateString('en-US', { month: 'short',  year: 'numeric', weekday: 'long' });
+
+        const weekday = date.toLocaleDateString('en-US', { weekday: 'long' }); // Saturday
+        const day = date.getDate(); // 3
+        const month = date.toLocaleDateString('en-US', { month: 'short' }); // Oct
+
+        return `${weekday}, ${day} ${month}`;
+    };
+
+    const weekdays = Array.from({ length: 7 }).map((_, i) => {
+        // Start from Sunday (0) and go through the week
+        const date = new Date(1970, 0, 4 + i); // Jan 4, 1970 was a Sunday
+        return date.toLocaleDateString(undefined, { weekday: 'short' });
+    });
+
+    const totalCost = () => {
+        const total = expenses.reduce((acc, expense) => acc + expense.amount, 0);
+        return `${total.toFixed(2)}`;
     };
 
     const CustomHeader = forwardRef<View, any>((props, ref) => {
         customHeaderProps.current = props;
 
         return (
-            <View ref={ref} style={styles.customHeader}>
-                <Text style={{
-                    fontSize: 16,
-                    fontWeight: 'bold',
-                    color: '#333',
-                }}>{currentMonth}</Text>
-                <View style={styles.navigationContainer}>
-                    <TouchableOpacity onPress={movePrevious}>
-                        <MaterialIcons name="chevron-left" size={24} />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={moveNext}>
-                        <MaterialIcons name="chevron-right" size={24} />
-                    </TouchableOpacity>
+            <View>
+                <View ref={ref} style={styles.customHeader}>
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: '#333',
+                    }}>{currentMonth}</Text>
+                    <View style={styles.navigationContainer}>
+                        <TouchableOpacity onPress={movePrevious}>
+                            <MaterialIcons name="chevron-left" size={24} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={moveNext}>
+                            <MaterialIcons name="chevron-right" size={24} />
+                        </TouchableOpacity>
+                    </View>
                 </View>
-
+                <View style={{
+                    flexDirection: 'row',
+                    justifyContent: 'space-around',
+                }}>
+                    {weekdays.map((day) => (
+                        <Text style={{ fontWeight: "bold", margin: 'auto' }} key={day}>{day}</Text>
+                    ))}
+                </View>
             </View>
         );
     });
     CustomHeader.displayName = "CustomHeader";
 
     const marked = useMemo(() => {
-        return {
-            [getDate(-2)]: {
-                dotColor: 'red',
-                marked: true
-            },
-            [selected]: {
+        // Create an object where keys are date strings like "2025-08-18"
+        const marks: Record<string, any> = {};
+
+        expenses.forEach((expense) => {
+            const date = expense.date.split("T")[0]; // ensure format YYYY-MM-DD
+            if (!marks[date]) {
+                marks[date] = { marked: true, dotColor: 'red' }; // first expense for this day
+            }
+        });
+
+        // add currently selected day styling
+        if (selected) {
+            marks[selected] = {
+                ...(marks[selected] || {}),
                 selected: true,
                 disableTouchEvent: true,
                 selectedColor: 'black',
-                selectedTextColor: 'white'
-            }
-        };
-    }, [selected]);
+                selectedTextColor: 'white',
+            };
+        }
+
+        return marks;
+    }, [expenses, selected]);
 
 
     return (
@@ -122,11 +159,15 @@ const CalendarModal = ({
                 current={INITIAL_DATE}
                 onDayPress={onDayPress}
                 markedDates={marked}
+                hideExtraDays
             />
             <ScrollView>
                 <View style={styles.spendListContainer}>
-                    <Text style={styles.filterDate}>{getDay()}</Text>
-                    {expenses.map((expense) => (
+                    <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Text style={styles.filterDate}>{getDay()}</Text>
+                        <Text style={styles.filterDate}>{getDeviceCurrencySymbol()}{totalCost()}</Text>
+                    </View>
+                    {filteredExpenses.map((expense) => (
                         <View key={expense.id} style={styles.innerListContainer}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                                 <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
@@ -156,7 +197,7 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 10,
         paddingHorizontal: 10,
-        backgroundColor: '#fff',
+        backgroundColor: '#f8f8ff',
     },
     headerContainer: {
         height: 50,
@@ -175,12 +216,13 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
     },
     calendar: {
-        marginBottom: 10
+        backgroundColor: '#fff',
+        borderRadius: 10,
     },
     navigationContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
-        gap: 15,
+        gap: 30,
         alignItems: 'center',
     },
     navButton: {
@@ -202,7 +244,6 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: 10,
-        backgroundColor: '#f5f5f5',
         borderRadius: 8,
         marginBottom: 10,
     },
@@ -213,7 +254,7 @@ const styles = StyleSheet.create({
     innerListContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#f8f8ff',
+        backgroundColor: '#fff',
         borderRadius: 15,
         padding: 10,
         elevation: 1,
