@@ -1,4 +1,5 @@
 import * as  SecureStore from "expo-secure-store"
+import * as Localization from "expo-localization";
 
 export function currentGreeting() {
     const date = new Date()
@@ -40,4 +41,47 @@ export function formateTime(date: string) {
         minute: '2-digit',
         hour12: true, // enables AM/PM
     })
+}
+
+export function getCurrencyLogo(currency: string): string {
+    switch (currency.toUpperCase()) {
+        case "USD": return "$";
+        case "EUR": return "€";
+        case "GBP": return "£";
+        case "JPY": return "¥";
+        case "CNY": return "¥";
+        case "KRW": return "₩";
+        case "INR": return "₹";
+        case "RUB": return "₽";
+        case "NGN": return "₦";
+        case "THB": return "฿";
+        case "VND": return "₫";
+        case "PLN": return "t"
+        default: return "¤"; // generic currency symbol
+    }
+}
+
+export function getDeviceCurrencySymbol(): string {
+    // const locale = Localization.locale; // e.g. "en-US"
+    const currency = Localization.getLocales()[0].currencyCode ?? "USD"; 
+    return getCurrencyLogo(currency);
+}
+
+
+
+export function getCurrency(currency: string): string {
+    try {
+        const formatter = new Intl.NumberFormat(undefined, {
+            style: "currency",
+            currency,
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        });
+        // Example: "€100" → take the first/last non-numeric char
+        const parts = formatter.formatToParts(100);
+        const symbol = parts.find(p => p.type === "currency")?.value;
+        return symbol || "¤"; // fallback generic
+    } catch {
+        return "¤"; // fallback if currency not supported
+    }
 }
