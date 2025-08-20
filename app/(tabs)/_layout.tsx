@@ -9,6 +9,7 @@ import {
 import { LinearGradient } from "expo-linear-gradient";
 import React, { useState } from "react";
 import AddExpenseModal from "./create";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 
 function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
     return (
@@ -97,7 +98,7 @@ export default function TabLayout() {
     const [modalVisible, setModalVisible] = useState(false);
 
     return (
-        <>
+        <BottomSheetModalProvider>
             <Tabs
                 screenOptions={{
                     headerShown: false,
@@ -143,7 +144,7 @@ export default function TabLayout() {
                     <AddExpenseModal  setModalVisible={setModalVisible} />
                 </View>
             </Modal>
-        </>
+        </BottomSheetModalProvider>
     );
 }
 

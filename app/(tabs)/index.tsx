@@ -1,9 +1,12 @@
-import useExpenseStore from '@/store/useExpenseStore'
+import useExpenseStore, { Expense } from '@/store/useExpenseStore'
 import { currentGreeting, formateTime } from '@/util/lib'
 import { Image } from 'expo-image'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import CalendarModal from '../(modal)/CalendarModal'
+import ExpenseBottomSheet from '../(expenses)/BottomSheetModal'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+
 
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState('Today')
@@ -11,6 +14,14 @@ const Index = () => {
   const filters = ['Today', 'This Week', 'This Month']
 
   const [calendarModalVisible, setCalendarModalVisible] = useState(false)
+
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
+  const bottomSheetRef = useRef<BottomSheetModal>(null)
+
+  const openExpenseDetails = (expense: Expense) => {
+    setSelectedExpense(expense)
+    bottomSheetRef.current?.present()
+  }
 
   const handleFilterPress = (filter: string) => {
     setActiveFilter(filter)
@@ -63,9 +74,9 @@ const Index = () => {
           </TouchableOpacity>
         ))}
         <TouchableOpacity
-        onPress={()=>setCalendarModalVisible(true)}
+          onPress={() => setCalendarModalVisible(true)}
         >
-          <Text  style={styles.filterText}>
+          <Text style={styles.filterText}>
             Calendar
           </Text>
         </TouchableOpacity>
@@ -79,7 +90,7 @@ const Index = () => {
 
         {
           expenses.map((expense) => (
-            <View key={expense.id} style={styles.innerListContainer}>
+            <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
                 <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
                 <View style={{ gap: 5 }}>
@@ -93,7 +104,7 @@ const Index = () => {
                 </View>
               </View>
               <Text>{expense.amount}</Text>
-            </View>
+            </TouchableOpacity>
           ))
         }
       </View>
@@ -107,6 +118,7 @@ const Index = () => {
           setCalendarModalVisible={setCalendarModalVisible}
         />
       </Modal>
+      <ExpenseBottomSheet expense={selectedExpense} ref={bottomSheetRef} />
     </View>
   )
 }

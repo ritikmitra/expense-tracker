@@ -62,8 +62,8 @@ export function getCurrencyLogo(currency: string): string {
 }
 
 export function getDeviceCurrencySymbol(): string {
-    // const locale = Localization.locale; // e.g. "en-US"
-    const currency = Localization.getLocales()[0].currencyCode ?? "USD"; 
+    const currency = Localization.getLocales()[0].currencyCode ?? "USD";
+    console.log(Localization.getLocales());
     return getCurrencyLogo(currency);
 }
 
@@ -83,5 +83,28 @@ export function getCurrency(currency: string): string {
         return symbol || "¤"; // fallback generic
     } catch {
         return "¤"; // fallback if currency not supported
+    }
+}
+
+export function getEmoji(emojiNames: string) {
+    switch (emojiNames) {
+        case "food": return "🍜"
+        case "fuel": return "⛽"
+        case "family" : return "👨‍👩‍👧‍👦"
+        case "education" : return "🎓"
+        case "shopping" : return "🛍️"
+        case "healthcare" : return "💊"
+        case "transfer" : return "💵"
+        case "housing" : return "🏠"
+        case "travel" : return "✈️"
+        case "entertainment" : return "🎫"
+        case "withdrawl" : return "💳"
+        case "bills/utilities" : return "💡"
+        case "transportation" : return "🚌"
+        case "socializing" : return "🍻"
+        case "miscellaneous" : return "💬"
+        case "gaming" : return "🎮"
+        default:
+            return "📎"
     }
 }
