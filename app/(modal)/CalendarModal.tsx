@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useCallback, useMemo, useState, forwardRef, useRef } from 'react';
 import { Calendar } from 'react-native-calendars';
 import useExpenseStore from '@/store/useExpenseStore';
-import { formateTime, getCurrencyLogo, getDeviceCurrencySymbol } from '@/util/lib';
+import { formateTime, getDeviceCurrencySymbol } from '@/util/lib';
 import { Image } from 'expo-image';
 
 
