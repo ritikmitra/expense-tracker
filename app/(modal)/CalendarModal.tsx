@@ -1,10 +1,10 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import { useCallback, useMemo, useState, forwardRef, useRef, useEffect } from 'react';
+import { useCallback, useMemo, useState, forwardRef, useRef } from 'react';
 import { Calendar } from 'react-native-calendars';
 import useExpenseStore from '@/store/useExpenseStore';
 import { formatTime, getDeviceCurrencySymbol } from '@/util/lib';
-import { Image } from 'expo-image';
+import { categories } from './CategoryModal';
 
 
 interface CalendarDay {
@@ -173,14 +173,14 @@ const CalendarModal = ({
                     {filteredExpenses.map((expense) => (
                         <View key={expense.id} style={styles.innerListContainer}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
-                                <View style={{ gap: 5 }}>
+                                <Text style={{ fontSize: 25 }}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
+                                <View style={{ gap: 1 }}>
                                     <Text style={{
                                         color: '#333',
                                     }}>{expense.description}</Text>
                                     <Text style={{
                                         color: '#666',
-                                        fontSize: 12,
+                                        fontSize: 10,
                                     }}>{formatTime(expense.date)}</Text>
                                 </View>
                             </View>
@@ -199,7 +199,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        paddingHorizontal: 10,
+        paddingHorizontal: 20,
         backgroundColor: '#f8f8ff',
     },
     headerContainer: {
@@ -260,7 +260,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 15,
         padding: 10,
-        elevation: 1,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         justifyContent: 'space-between',
     },
     filterDate: {
