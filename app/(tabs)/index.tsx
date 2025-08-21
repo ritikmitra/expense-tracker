@@ -183,6 +183,7 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#fff',
     backgroundColor: 'black',
+    borderColor: 'black',
   },
   spendContainer: {
     padding: 25,
