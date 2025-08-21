@@ -2,7 +2,7 @@ import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, Modal } 
 import React, { useState } from 'react'
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import CategoryModal from '../(modal)/CategoryModal';
+import CategoryModal, { categories } from '../(modal)/CategoryModal';
 import useExpenseStore from '@/store/useExpenseStore';
 
 
@@ -25,6 +25,9 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
   };
 
   const handleAddExpense = () => {
+
+    ;
+    
     if (!amount || !description || !selectedCategory) {
       alert('Please fill all fields');
       return;
@@ -71,7 +74,7 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           placeholder="e.g. 100.00"
           placeholderTextColor="#666"
           value={amount}
-        onChangeText={setAmount}
+          onChangeText={setAmount}
         />
       </View>
       <View style={styles.inputSection}>
@@ -91,9 +94,14 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           style={styles.inputCategoryStyle}
           onPress={() => setCategoryModalVisible(true)}
         >
-          <Text style={{ color: selectedCategory ? '#000' : '#999' }}>
-            {selectedCategory || 'Select Category'}
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+            {selectedCategory &&
+              <Text>{categories.find((category) => category.name === selectedCategory)?.emoji}</Text>
+            }
+            <Text style={{ color: selectedCategory ? '#000' : '#999' }}>
+              {selectedCategory || 'Select Category'}
+            </Text>
+          </View>
           <Ionicons name="chevron-forward-circle" size={24} color="#666" style={{ marginLeft: 10 }} />
         </TouchableOpacity>
       </View>

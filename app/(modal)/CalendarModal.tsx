@@ -1,9 +1,9 @@
 import { MaterialIcons } from '@expo/vector-icons'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
-import { useCallback, useMemo, useState, forwardRef, useRef } from 'react';
+import { useCallback, useMemo, useState, forwardRef, useRef, useEffect } from 'react';
 import { Calendar } from 'react-native-calendars';
 import useExpenseStore from '@/store/useExpenseStore';
-import { formateTime, getDeviceCurrencySymbol } from '@/util/lib';
+import { formatTime, getDeviceCurrencySymbol } from '@/util/lib';
 import { Image } from 'expo-image';
 
 
@@ -37,6 +37,7 @@ const CalendarModal = ({
     const [selected, setSelected] = useState(INITIAL_DATE);
 
     const [currentMonth, setCurrentMonth] = useState(formatMonth(new Date()));
+    const [totalCost, setTotalCost] = useState(0)
 
     const filteredExpenses = useMemo(() => filterExpensesByDate(selected), [filterExpensesByDate, selected]);
 
@@ -44,6 +45,11 @@ const CalendarModal = ({
     const onDayPress = useCallback((day: CalendarDay) => {
         setSelected(day.dateString);
     }, []);
+
+    useMemo(() => {
+        const total = filterExpensesByDate(selected).reduce((acc, expense) => acc + expense.amount, 0);
+        setTotalCost(total);
+    }, [selected, filterExpensesByDate]);
 
 
     const customHeaderProps: any = useRef(null);
@@ -79,10 +85,7 @@ const CalendarModal = ({
         return date.toLocaleDateString(undefined, { weekday: 'short' });
     });
 
-    const totalCost = () => {
-        const total = expenses.reduce((acc, expense) => acc + expense.amount, 0);
-        return `${total.toFixed(2)}`;
-    };
+
 
     const CustomHeader = forwardRef<View, any>((props, ref) => {
         customHeaderProps.current = props;
@@ -165,7 +168,7 @@ const CalendarModal = ({
                 <View style={styles.spendListContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={styles.filterDate}>{getDay()}</Text>
-                        <Text style={styles.filterDate}>{getDeviceCurrencySymbol()}{totalCost()}</Text>
+                        <Text style={styles.filterDate}>{getDeviceCurrencySymbol()}{totalCost}</Text>
                     </View>
                     {filteredExpenses.map((expense) => (
                         <View key={expense.id} style={styles.innerListContainer}>
@@ -178,7 +181,7 @@ const CalendarModal = ({
                                     <Text style={{
                                         color: '#666',
                                         fontSize: 12,
-                                    }}>{formateTime(expense.date)}</Text>
+                                    }}>{formatTime(expense.date)}</Text>
                                 </View>
                             </View>
                             <Text>{expense.amount}</Text>

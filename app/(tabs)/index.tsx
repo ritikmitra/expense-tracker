@@ -1,11 +1,12 @@
 import useExpenseStore, { Expense } from '@/store/useExpenseStore'
-import { currentGreeting, formateTime } from '@/util/lib'
+import { currentGreeting, formatTime, getDeviceCurrencySymbol } from '@/util/lib'
 import { Image } from 'expo-image'
 import React, { useRef, useState } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import CalendarModal from '../(modal)/CalendarModal'
 import ExpenseBottomSheet from '../(expenses)/BottomSheetModal'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { categories } from '../(modal)/CategoryModal'
 
 
 const Index = () => {
@@ -83,7 +84,7 @@ const Index = () => {
       </View>
       <View style={styles.spendContainer}>
         <Text style={styles.spendText}>Spend so far</Text>
-        <Text style={styles.spendAmount}>$1,200</Text>
+        <Text style={styles.spendAmount}>{getDeviceCurrencySymbol()}1,200</Text>
       </View>
       <View style={styles.spendListContainer}>
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
@@ -92,18 +93,18 @@ const Index = () => {
           expenses.map((expense) => (
             <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
-                <View style={{ gap: 5 }}>
+                <Text style={{ fontSize : 25}}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
+                <View style={{ gap: 1 }}>
                   <Text style={{
                     color: '#333',
                   }}>{expense.description}</Text>
                   <Text style={{
                     color: '#666',
-                    fontSize: 12,
-                  }}>{formateTime(expense.date)}</Text>
+                    fontSize: 10,
+                  }}>{formatTime(expense.date)}</Text>
                 </View>
               </View>
-              <Text>{expense.amount}</Text>
+              <Text>{getDeviceCurrencySymbol()}{expense.amount}</Text>
             </TouchableOpacity>
           ))
         }
@@ -217,7 +218,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8ff',
     borderRadius: 15,
     padding: 10,
-    elevation: 1,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
     justifyContent: 'space-between',
   },
 })
