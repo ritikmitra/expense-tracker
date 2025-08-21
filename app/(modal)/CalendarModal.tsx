@@ -3,8 +3,8 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-nati
 import { useCallback, useMemo, useState, forwardRef, useRef } from 'react';
 import { Calendar } from 'react-native-calendars';
 import useExpenseStore from '@/store/useExpenseStore';
-import { formateTime, getDeviceCurrencySymbol } from '@/util/lib';
-import { Image } from 'expo-image';
+import { formatTime, getDeviceCurrencySymbol } from '@/util/lib';
+import { categories } from './CategoryModal';
 
 
 interface CalendarDay {
@@ -37,6 +37,7 @@ const CalendarModal = ({
     const [selected, setSelected] = useState(INITIAL_DATE);
 
     const [currentMonth, setCurrentMonth] = useState(formatMonth(new Date()));
+    const [totalCost, setTotalCost] = useState(0)
 
     const filteredExpenses = useMemo(() => filterExpensesByDate(selected), [filterExpensesByDate, selected]);
 
@@ -44,6 +45,11 @@ const CalendarModal = ({
     const onDayPress = useCallback((day: CalendarDay) => {
         setSelected(day.dateString);
     }, []);
+
+    useMemo(() => {
+        const total = filterExpensesByDate(selected).reduce((acc, expense) => acc + expense.amount, 0);
+        setTotalCost(total);
+    }, [selected, filterExpensesByDate]);
 
 
     const customHeaderProps: any = useRef(null);
@@ -79,10 +85,7 @@ const CalendarModal = ({
         return date.toLocaleDateString(undefined, { weekday: 'short' });
     });
 
-    const totalCost = () => {
-        const total = expenses.reduce((acc, expense) => acc + expense.amount, 0);
-        return `${total.toFixed(2)}`;
-    };
+
 
     const CustomHeader = forwardRef<View, any>((props, ref) => {
         customHeaderProps.current = props;
@@ -165,20 +168,20 @@ const CalendarModal = ({
                 <View style={styles.spendListContainer}>
                     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text style={styles.filterDate}>{getDay()}</Text>
-                        <Text style={styles.filterDate}>{getDeviceCurrencySymbol()}{totalCost()}</Text>
+                        <Text style={styles.filterDate}>{getDeviceCurrencySymbol()}{totalCost}</Text>
                     </View>
                     {filteredExpenses.map((expense) => (
                         <View key={expense.id} style={styles.innerListContainer}>
                             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                                <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
-                                <View style={{ gap: 5 }}>
+                                <Text style={{ fontSize: 25 }}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
+                                <View style={{ gap: 1 }}>
                                     <Text style={{
                                         color: '#333',
                                     }}>{expense.description}</Text>
                                     <Text style={{
                                         color: '#666',
-                                        fontSize: 12,
-                                    }}>{formateTime(expense.date)}</Text>
+                                        fontSize: 10,
+                                    }}>{formatTime(expense.date)}</Text>
                                 </View>
                             </View>
                             <Text>{expense.amount}</Text>
@@ -196,7 +199,7 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         padding: 10,
-        paddingHorizontal: 10,
+        paddingHorizontal: 20,
         backgroundColor: '#f8f8ff',
     },
     headerContainer: {
@@ -257,7 +260,7 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         borderRadius: 15,
         padding: 10,
-        elevation: 1,
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         justifyContent: 'space-between',
     },
     filterDate: {

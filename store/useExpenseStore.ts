@@ -4,7 +4,7 @@ import { secureStorage } from '@/util/lib';
 import { nanoid } from 'nanoid/non-secure';
 
 
-type Expense = {
+export type Expense = {
   id: string;
   amount: number;
   description: string;

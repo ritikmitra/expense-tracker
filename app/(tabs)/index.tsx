@@ -1,9 +1,13 @@
-import useExpenseStore from '@/store/useExpenseStore'
-import { currentGreeting, formateTime } from '@/util/lib'
+import useExpenseStore, { Expense } from '@/store/useExpenseStore'
+import { currentGreeting, formatTime, getDeviceCurrencySymbol } from '@/util/lib'
 import { Image } from 'expo-image'
-import React, { useState } from 'react'
+import React, { useRef, useState } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import CalendarModal from '../(modal)/CalendarModal'
+import ExpenseBottomSheet from '../(expenses)/BottomSheetModal'
+import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { categories } from '../(modal)/CategoryModal'
+
 
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState('Today')
@@ -11,6 +15,14 @@ const Index = () => {
   const filters = ['Today', 'This Week', 'This Month']
 
   const [calendarModalVisible, setCalendarModalVisible] = useState(false)
+
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
+  const bottomSheetRef = useRef<BottomSheetModal>(null)
+
+  const openExpenseDetails = (expense: Expense) => {
+    setSelectedExpense(expense)
+    bottomSheetRef.current?.present()
+  }
 
   const handleFilterPress = (filter: string) => {
     setActiveFilter(filter)
@@ -63,37 +75,37 @@ const Index = () => {
           </TouchableOpacity>
         ))}
         <TouchableOpacity
-        onPress={()=>setCalendarModalVisible(true)}
+          onPress={() => setCalendarModalVisible(true)}
         >
-          <Text  style={styles.filterText}>
+          <Text style={styles.filterText}>
             Calendar
           </Text>
         </TouchableOpacity>
       </View>
       <View style={styles.spendContainer}>
         <Text style={styles.spendText}>Spend so far</Text>
-        <Text style={styles.spendAmount}>$1,200</Text>
+        <Text style={styles.spendAmount}>{getDeviceCurrencySymbol()}1,200</Text>
       </View>
       <View style={styles.spendListContainer}>
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
 
         {
           expenses.map((expense) => (
-            <View key={expense.id} style={styles.innerListContainer}>
+            <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Image source={require('../../assets/images/icon.png')} style={{ width: 50, height: 50 }} />
-                <View style={{ gap: 5 }}>
+                <Text style={{ fontSize : 25}}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
+                <View style={{ gap: 1 }}>
                   <Text style={{
                     color: '#333',
                   }}>{expense.description}</Text>
                   <Text style={{
                     color: '#666',
-                    fontSize: 12,
-                  }}>{formateTime(expense.date)}</Text>
+                    fontSize: 10,
+                  }}>{formatTime(expense.date)}</Text>
                 </View>
               </View>
-              <Text>{expense.amount}</Text>
-            </View>
+              <Text>{getDeviceCurrencySymbol()}{expense.amount}</Text>
+            </TouchableOpacity>
           ))
         }
       </View>
@@ -107,6 +119,7 @@ const Index = () => {
           setCalendarModalVisible={setCalendarModalVisible}
         />
       </Modal>
+      <ExpenseBottomSheet expense={selectedExpense} ref={bottomSheetRef} />
     </View>
   )
 }
@@ -170,6 +183,7 @@ const styles = StyleSheet.create({
   filterTextActive: {
     color: '#fff',
     backgroundColor: 'black',
+    borderColor: 'black',
   },
   spendContainer: {
     padding: 25,
@@ -205,7 +219,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f8ff',
     borderRadius: 15,
     padding: 10,
-    elevation: 1,
+    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
     justifyContent: 'space-between',
   },
 })
