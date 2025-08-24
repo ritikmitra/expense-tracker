@@ -1,88 +1,164 @@
-import React from 'react';
+import useExpenseStore from '@/store/useExpenseStore';
+import { getDeviceCurrencySymbol } from '@/util/lib';
+import { useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { COLORS } from '@/constants/Color'; // Adjust the import path as necessary
+import { categories } from '../(modal)/CategoryModal';
 
-const Insights = () => {
-  const insightsData = [
-    { title: 'User Activity', value: '2,150', description: 'Active users in the last 7 days' },
-    { title: 'Sales', value: '$14,300', description: 'Total sales this month' },
-    { title: 'Retention Rate', value: '88%', description: 'Retention rate in the past 30 days' },
-    { title: 'Website Traffic', value: '10,000+', description: 'Website visits this week' },
-    { title: 'Conversion Rate', value: '5%', description: 'Conversion rate from clicks to sales' },
-    { title: 'Customer Satisfaction', value: '92%', description: 'Customer satisfaction score' },
-    { title: 'New Signups', value: '1,200', description: 'New users registered this month' },
-    { title: 'Feedback Received', value: '350', description: 'Feedback submissions in the last week' },
-    { title: 'Support Tickets', value: '45', description: 'Open support tickets currently' },
-    { title: 'Average Session Duration', value: '3m 45s', description: 'Average time spent on the app' },
-  ];
+
+
+const completeionBar = (percent: number) => {
+
+  let bgColor;
+
+  if (percent < 10) {
+    // Very light red
+    bgColor = "rgb(255, 204, 204)";
+  } else if (percent < 20) {
+    // Light red
+    bgColor = "rgb(255, 178, 178)";
+  } else if (percent < 30) {
+    // Soft red-orange
+    bgColor = "rgb(255, 153, 153)";
+  } else if (percent < 40) {
+    // Light orange-red
+    bgColor = "rgb(255, 178, 128)";
+  } else if (percent < 50) {
+    // Light orange
+    bgColor = "rgb(255, 204, 153)";
+  } else if (percent < 60) {
+    // Pale orange-yellow
+    bgColor = "rgb(255, 229, 180)";
+  } else if (percent < 70) {
+    // Light yellow-green
+    bgColor = "rgb(204, 255, 153)";
+  } else if (percent < 80) {
+    // Soft green
+    bgColor = "rgb(178, 255, 178)";
+  } else if (percent < 90) {
+    // Light green
+    bgColor = "rgb(153, 255, 153)";
+  } else {
+    // Very light green
+    bgColor = "rgb(204, 255, 204)";
+  }
 
   return (
-    <ScrollView style={styles.container}>
-      <Text style={styles.heading}>Insights Dashboard</Text>
+    <View style={{ height: 5, width: '100%', backgroundColor: '#e0e0e0', borderRadius: 5 }}>
+      <View style={{ height: '100%', width: `${percent}%`, backgroundColor: bgColor, borderRadius: 5 }} />
+    </View>
+  );
+}
 
-      {insightsData.map((item, index) => (
-        <View key={index} style={styles.card}>
-          <Text style={styles.title}>{item.title}</Text>
-          <Text style={styles.value}>{item.value}</Text>
-          <Text style={styles.description}>{item.description}</Text>
-        </View>
-      ))}
 
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>View More Insights</Text>
-      </TouchableOpacity>
-    </ScrollView>
+const Insights = () => {
+
+  const [activeFilter, setActiveFilter] = useState('This Month')
+
+  const filters = ['This Month', "Year"]
+
+  const expenses = useExpenseStore((state) => state.expenses)
+
+  const handleFilterPress = (filter: string) => {
+    setActiveFilter(filter)
+  }
+
+  //Group expenses by category
+  const groupedExpenses = expenses.reduce((acc, expense) => {
+    if (!acc[expense.category]) {
+      acc[expense.category] = 0;
+    }
+    acc[expense.category] += expense.amount;
+    return acc;
+  }
+    , {} as { [key: string]: number });
+
+
+  return (
+    <View style={styles.container}>
+      <Text style={styles.header} >Insights</Text>
+      <View style={styles.filterContainer}>
+        {filters.map((filter) => (
+          <TouchableOpacity
+            key={filter}
+            onPress={() => handleFilterPress(filter)}
+          >
+            <Text
+              style={[
+                styles.filterText,
+                activeFilter === filter && styles.filterTextActive
+              ]}
+            >
+              {filter}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+      <ScrollView style={styles.scrollContent}>
+        {
+          Object.entries(groupedExpenses).map(([category, total]) => (
+            <View key={category} style={styles.innerContainer}>
+              <Text style={{ fontSize: 25 }}>{categories.find((cat) => cat.name === category)?.emoji}</Text>
+              <View style={{ flex: 1, gap: 5 }}>
+                <Text style={{ fontSize: 15, fontWeight: 'bold' }}>{category}</Text>
+                {completeionBar(Math.min((total / 1000) * 100, 100))}
+              </View>
+              <View style={{ alignItems: 'flex-end' }}>
+                <Text style={{ fontSize: 14, fontWeight: 'bold' }}>{getDeviceCurrencySymbol()}{total.toFixed(2)}</Text>
+                <Text style={{
+                  fontSize: 12,
+                  color: '#666',
+                }} >{Math.min((total / 1000) * 100, 100)}%</Text>
+              </View>
+            </View>
+          ))
+        }
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
-    backgroundColor: COLORS.dark.background,
+    padding: 15,
+    backgroundColor: "#f5eaeaff",
+    gap: 15,
   },
-  heading: {
+  header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
-    textAlign: 'center',
   },
-  card: {
-    backgroundColor: '#fff',
-    padding: 15,
-    marginBottom: 15,
-    borderRadius: 10,
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 5 },
-    elevation: 5,
+  filterContainer: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 10,
   },
-  title: {
-    fontSize: 18,
-    fontWeight: 'bold',
+  filterText: {
+    fontSize: 10,
+    color: '#333',
+    padding: 8,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
-  value: {
-    fontSize: 24,
-    color: '#2d2d2d',
-    marginVertical: 10,
-  },
-  description: {
-    fontSize: 14,
-    color: '#6c6c6c',
-  },
-  button: {
-    backgroundColor: '#007BFF',
-    padding: 15,
-    borderRadius: 8,
-    marginTop: 30,
-    alignItems: 'center',
-  },
-  buttonText: {
+  filterTextActive: {
     color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
+    backgroundColor: 'black',
+    borderColor: 'black',
   },
+  innerContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 5,
+    backgroundColor: '#fff',
+    paddingHorizontal: 10,
+    paddingVertical: 12,
+  },
+  scrollContent: {
+    borderRadius: 20,
+  }
 });
 
 export default Insights;
