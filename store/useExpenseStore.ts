@@ -1,9 +1,9 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
-import { secureStorage } from '@/util/lib';
-import { nanoid } from 'nanoid/non-secure';
 import { db } from '@/config/firebaseConfig';
-import { collection, addDoc, deleteDoc, doc, getDocs, query, orderBy } from 'firebase/firestore';
+import { secureStorage } from '@/util/lib';
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import { nanoid } from 'nanoid/non-secure';
+import { create } from 'zustand';
+import { createJSONStorage, persist } from 'zustand/middleware';
 import useAuthStore from './useAuthStore';
 
 export type Expense = {
@@ -18,6 +18,7 @@ type Store = {
   expenses: Expense[];
   addExpense: (expense: Omit<Expense, 'id'>) => Promise<void>;
   deleteExpense: (id: string) => Promise<void>;
+  modifyExpense: (id: string, updates: Partial<Omit<Expense, 'id'>>) => Promise<void>;
   fetchExpenses: () => Promise<void>;
 };
 
@@ -49,6 +50,22 @@ const useExpenseStore = create<Store>()(
 
         //update local state
         set({ expenses: get().expenses.filter((e) => e.id !== id) })
+      },
+
+      modifyExpense: async (id, updates) => {
+        const user = useAuthStore.getState().user
+        if (!user) return;
+
+        // Update in Firestore
+        const docRef = doc(db, "users", user.uid, "expenses", id);
+        await updateDoc(docRef, updates);
+
+        // Update local state
+        set({
+          expenses: get().expenses.map((expense) =>
+            expense.id === id ? { ...expense, ...updates } : expense
+          ),
+        });
       },
 
       fetchExpenses: async () => {

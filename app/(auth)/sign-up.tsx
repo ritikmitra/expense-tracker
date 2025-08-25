@@ -2,6 +2,7 @@ import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-nativ
 import React, { useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
 import { Link, useRouter } from 'expo-router';
+import useAuthStore from '@/store/useAuthStore';
 
 
 type field = 'firstName' | 'lastName' | 'email' | 'password' | null;
@@ -9,6 +10,27 @@ type field = 'firstName' | 'lastName' | 'email' | 'password' | null;
 const SignUp = () => {
     const router = useRouter();
     const [focusedInput, setFocusedInput] = useState<field>(null); // Track which field is focused
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
+
+    const signUp = useAuthStore((state) => state.signUp);
+
+
+    const handleSignUp = async () => {
+        try {
+          setError(null);
+          await signUp(email, password, firstName, lastName); // Firebase sign up
+          // ✅ You could also save firstName + lastName in Firestore later
+          router.replace("/(tabs)"); // redirect after success
+
+        } catch (err: any) {
+          console.error("Sign up error:", err);
+          setError(err.message || "Something went wrong");
+        }
+      };
 
     const getInputStyle = (name : field) => ([
         styles.input,
@@ -36,6 +58,8 @@ const SignUp = () => {
                     style={getInputStyle('firstName')}
                     onFocus={() => setFocusedInput('firstName')}
                     onBlur={() => setFocusedInput(null)}
+                    value={firstName}
+                    onChangeText={setFirstName}
                 />
             </View>
 
@@ -46,6 +70,8 @@ const SignUp = () => {
                     style={getInputStyle('lastName')}
                     onFocus={() => setFocusedInput('lastName')}
                     onBlur={() => setFocusedInput(null)}
+                    value={lastName}
+                    onChangeText={setLastName}
                 />
             </View>
 
@@ -56,6 +82,8 @@ const SignUp = () => {
                     style={getInputStyle('email')}
                     onFocus={() => setFocusedInput('email')}
                     onBlur={() => setFocusedInput(null)}
+                    value={email}
+                    onChangeText={setEmail}
                 />
             </View>
 
@@ -67,6 +95,8 @@ const SignUp = () => {
                     secureTextEntry
                     onFocus={() => setFocusedInput('password')}
                     onBlur={() => setFocusedInput(null)}
+                    value={password}
+                    onChangeText={setPassword}
                 />
             </View>
 
@@ -79,7 +109,7 @@ const SignUp = () => {
             </View>
 
             {/* Create Account Button */}
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                 <Text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>Create Account</Text>
             </TouchableOpacity>
 
@@ -103,7 +133,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         paddingHorizontal: 25,
-        gap: 15,
         backgroundColor: '#fff',
     },
     text: {

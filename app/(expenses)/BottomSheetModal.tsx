@@ -10,6 +10,8 @@ import { formatDate, getDeviceCurrencySymbol } from '@/util/lib';
 import BlurredBackground from '@/components/BlurredBackground';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import useExpenseStore from '@/store/useExpenseStore';
+import useAuthStore from '@/store/useAuthStore';
+import { signOutFromGoogle } from "@/util/googleAuth"
 
 interface ExpenseBottomSheetProps {
     expense: { id: string; description: string; amount: number; date: string; category: string } | null
@@ -20,6 +22,8 @@ const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>
         const deleteExpense = useExpenseStore((state) => state.deleteExpense);
 
         const headerHeight = useHeaderHeight()
+
+        const { logout } = useAuthStore()
 
         const deleteExpenseAndCloseSheet = (expenseId: string) => {
             deleteExpense(expenseId)
@@ -67,7 +71,7 @@ const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>
                                 <Text style={styles.date}>{formatDate(expense.date)}</Text>
                             </View>
                             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, flex: 1, gap: 10 }}>
-                                <TouchableOpacity style={styles.modifyButton}>
+                                <TouchableOpacity onPress={() => { logout(); signOutFromGoogle(); }} style={styles.modifyButton}>
                                     <FontAwesome5 name="edit" size={18} color="black" />
                                     <Text style={{ color: 'black', fontSize: 14 }}>Modify</Text>
                                 </TouchableOpacity>
