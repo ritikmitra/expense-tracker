@@ -1,11 +1,12 @@
 import useAuthStore from "@/store/useAuthStore";
-import { signInWithGoogle as googleSignIn } from "@/util/googleAuth";
+// import { signInWithGoogle as googleSignIn } from "@/util/googleAuth";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link, useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-
+import * as Google from "expo-auth-session/providers/google";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 type field = 'email' | 'password' | null;
 
 const SignIn = () => {
@@ -16,6 +17,56 @@ const SignIn = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState<string | null>(null);
     const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+    const [token, setToken] = useState("");
+    const [userInfo, setUserInfo] = useState(null);
+
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        androidClientId: "737848617497-cribdhknviumi0q70osr1jvrkjhs6h9d.apps.googleusercontent.com",
+        webClientId: "737848617497-qpkdfv3mtu75dgppuihme1k1uk856lt1.apps.googleusercontent.com",
+    });
+
+    useEffect(() => {
+        handleEffect();
+    }, [response, token]);
+
+    async function handleEffect() {
+        const user = await getLocalUser();
+        console.log("user", user);
+        if (!user) {
+            if (response?.type === "success") {
+                // setToken(response.authentication.accessToken);
+                getUserInfo(response.authentication?.accessToken);
+            }
+        } else {
+            setUserInfo(user);
+            console.log("loaded locally");
+        }
+    }
+
+    const getLocalUser = async () => {
+        const data = await AsyncStorage.getItem("@user");
+        if (!data) return null;
+        return JSON.parse(data);
+    };
+
+    const getUserInfo = async (token) => {
+        if (!token) return;
+        try {
+            const response = await fetch(
+                "https://www.googleapis.com/userinfo/v2/me",
+                {
+                    headers: { Authorization: `Bearer ${token}` },
+                }
+            );
+
+            const user = await response.json();
+            await AsyncStorage.setItem("@user", JSON.stringify(user));
+            setUserInfo(user);
+        } catch (error) {
+            // Add your own error handler here
+        }
+    };
 
     const login = useAuthStore((state) => state.login);
     const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
@@ -30,29 +81,29 @@ const SignIn = () => {
         }
     }
 
-    const handleGoogleSignIn = async () => {
-        try {
-            setIsGoogleLoading(true);
-            setError(null);
+    // const handleGoogleSignIn = async () => {
+    //     try {
+    //         setIsGoogleLoading(true);
+    //         setError(null);
 
-            // Use native Google Sign-In
-            const result = await googleSignIn();
-            
-            if (result && result.idToken) {
-                // Sign in with Firebase using the ID token
-                await signInWithGoogle(result.idToken);
-                router.replace("/(tabs)");
-            } else {
-                throw new Error('Failed to get ID token from Google');
-            }
-        } catch (err: any) {
-            console.error('Google sign-in error:', err);
-            setError(err.message || "Google sign-in failed");
-            Alert.alert('Error', 'Google sign-in failed. Please try again.');
-        } finally {
-            setIsGoogleLoading(false);
-        }
-    }
+    //         // Use native Google Sign-In
+    //         const result = await googleSignIn();
+
+    //         if (result && result.idToken) {
+    //             // Sign in with Firebase using the ID token
+    //             await signInWithGoogle(result.idToken);
+    //             router.replace("/(tabs)");
+    //         } else {
+    //             throw new Error('Failed to get ID token from Google');
+    //         }
+    //     } catch (err: any) {
+    //         console.error('Google sign-in error:', err);
+    //         setError(err.message || "Google sign-in failed");
+    //         Alert.alert('Error', 'Google sign-in failed. Please try again.');
+    //     } finally {
+    //         setIsGoogleLoading(false);
+    //     }
+    // }
 
     const getInputStyle = (name: field) => ([
         styles.input,
@@ -77,7 +128,7 @@ const SignIn = () => {
                 justifyContent: 'space-between',
                 gap: 10,
             }}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -88,8 +139,8 @@ const SignIn = () => {
                         padding: 10,
                         opacity: isGoogleLoading ? 0.6 : 1,
                     }}
-                    onPress={handleGoogleSignIn}
-                    disabled={isGoogleLoading}
+                    onPress={() => { promptAsync() }}
+                    disabled={!request}
                 >
                     <Image source={require("@/assets/images/icons8-google.svg")} style={{
                         width: 30,
