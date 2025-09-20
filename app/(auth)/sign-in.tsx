@@ -3,8 +3,10 @@ import { signInWithGoogle as googleSignIn } from "@/util/googleAuth";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link, useRouter } from "expo-router";
+import { FirebaseError } from "firebase/app";
 import { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 
 type field = 'email' | 'password' | null;
 
@@ -21,11 +23,22 @@ const SignIn = () => {
     const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
 
     const handleSignIn = async () => {
+        if (!email || !password) {
+            setError("Please fill in all fields");
+            return;
+        }
         try {
             setError(null);
             await login(email, password);
             router.replace("/(tabs)");
         } catch (err: any) {
+            if (err instanceof FirebaseError) {
+                if (err.code === 'auth/user-not-found') {
+                    setError("No user found with this email.");
+                    return;
+                }
+            }
+            
             setError(err.message || "Something went wrong");
         }
     }
@@ -37,7 +50,7 @@ const SignIn = () => {
 
             // Use native Google Sign-In
             const result = await googleSignIn();
-            
+
             if (result && result.idToken) {
                 // Sign in with Firebase using the ID token
                 await signInWithGoogle(result.idToken);
@@ -60,7 +73,12 @@ const SignIn = () => {
     ]);
 
     return (
-        <View style={styles.container}>
+        <KeyboardAwareScrollView contentContainerStyle={styles.container}
+            enableOnAndroid={true}
+            extraScrollHeight={10}
+            keyboardShouldPersistTaps="handled"
+            extraHeight={Platform.OS === 'ios' ? 20 : 0}
+            >
             <TouchableOpacity onPress={() => router.back()}>
                 <MaterialIcons name='arrow-back-ios-new' size={24} style={{
                     marginBottom: 10,
@@ -77,7 +95,7 @@ const SignIn = () => {
                 justifyContent: 'space-between',
                 gap: 10,
             }}>
-                <TouchableOpacity 
+                <TouchableOpacity
                     style={{
                         flexDirection: 'row',
                         alignItems: 'center',
@@ -173,17 +191,17 @@ const SignIn = () => {
                     <Text style={{ fontSize: 16, color: 'blue', fontWeight: 'bold' }}>Sign up</Text>
                 </Link>
             </View>
-        </View>
+        </KeyboardAwareScrollView>
     );
 }
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        padding: 20,
         paddingHorizontal: 25,
         gap: 30,
         backgroundColor: '#fff',
+        justifyContent: 'flex-start',
     },
     text: {
         fontSize: 20,
@@ -194,6 +212,9 @@ const styles = StyleSheet.create({
         marginTop: 5,
         backgroundColor: '#f8f8ff',
         borderRadius: 5,
+        color: '#333',
+        borderWidth: 1,
+        borderColor: 'transparent',
     },
     inputFocused: {
         borderColor: 'black', // Blue highlight on focus
