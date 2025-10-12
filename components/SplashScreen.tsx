@@ -2,9 +2,10 @@ import { COLORS } from "@/constants/Color";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useRouter } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { Text, View, StyleSheet, TouchableOpacity } from "react-native";
 
-export default function Index() {
+export default function SplashScreen() {
 
   const router = useRouter();
 
@@ -12,9 +13,10 @@ export default function Index() {
     <View
       style={styles.container}
     >
-      <Image source={require("../assets/images/get-started.svg")} style={styles.image} />
+      <StatusBar style="dark" />
+      <Image source={require("@/assets/images/get-started.svg")} style={styles.image} />
       <Text style={styles.mainText}>Effortless financial management at your fingertips</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/sign-up")}>
+      <TouchableOpacity style={styles.button} onPress={() => router.push("/(auth)/sign-in")}>
         <Text style={styles.text}>Get Started</Text>
         <Ionicons name="arrow-forward-circle" size={24} color="white" />
       </TouchableOpacity>

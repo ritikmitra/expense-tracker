@@ -1,4 +1,4 @@
-import { Tabs } from "expo-router";
+import { useRouter, Tabs } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
     View,
@@ -7,9 +7,11 @@ import {
     Modal,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import AddExpenseModal from "./create";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import SplashScreen from "@/components/SplashScreen";
+import useAuthStore from "@/store/useAuthStore";
 
 function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
     return (
@@ -97,6 +99,16 @@ function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
 export default function TabLayout() {
     const [modalVisible, setModalVisible] = useState(false);
 
+    const { initAuth, user, loading } = useAuthStore();
+
+    useEffect(() => {
+        initAuth(); // 👈 subscribe to Firebase Auth
+    }, [initAuth]);
+
+    if (loading) return <SplashScreen />; // Show splash while Firebase checks auth
+    if (!user) return <SplashScreen />; // Or redirect to login if user is null
+
+
     return (
         <BottomSheetModalProvider>
             <Tabs
@@ -141,7 +153,7 @@ export default function TabLayout() {
                             <Text style={{ color: "blue" }}>Close</Text>
                         </Pressable>
                     </View> */}
-                    <AddExpenseModal  setModalVisible={setModalVisible} />
+                    <AddExpenseModal setModalVisible={setModalVisible} />
                 </View>
             </Modal>
         </BottomSheetModalProvider>

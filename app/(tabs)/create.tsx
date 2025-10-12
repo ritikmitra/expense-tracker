@@ -26,7 +26,6 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
 
   const handleAddExpense = () => {
 
-    ;
     
     if (!amount || !description || !selectedCategory) {
       alert('Please fill all fields');

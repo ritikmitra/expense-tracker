@@ -1,7 +1,8 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity } from 'react-native'
-import React, { useState } from 'react'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, Pressable } from 'react-native'
+import React, { useEffect, useState } from 'react'
 import { MaterialIcons } from '@expo/vector-icons'
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
+import useAuthStore from '@/store/useAuthStore';
 
 
 type field = 'firstName' | 'lastName' | 'email' | 'password' | null;
@@ -9,8 +10,38 @@ type field = 'firstName' | 'lastName' | 'email' | 'password' | null;
 const SignUp = () => {
     const router = useRouter();
     const [focusedInput, setFocusedInput] = useState<field>(null); // Track which field is focused
+    const [firstName, setFirstName] = useState('');
+    const [lastName, setLastName] = useState('');
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState<string | null>(null);
 
-    const getInputStyle = (name : field) => ([
+    const signUp = useAuthStore((state) => state.signUp);
+
+
+    const handleSignUp = async () => {
+        if (!firstName || !lastName || !email || !password) {
+            setError("Please fill in all fields");
+            return;
+        }
+        try {
+            setError(null);
+            await signUp(email, password, firstName, lastName); // Firebase sign up
+            // ✅ You could also save firstName + lastName in Firestore later
+            router.replace("/(tabs)"); // redirect after success
+
+        } catch (err: any) {
+            console.error("Sign up error:", err);
+            setError(err.message || "Something went wrong");
+        }
+    };
+
+    useEffect(() => {
+        setError(null);
+    }, [firstName, lastName, email, password])
+
+
+    const getInputStyle = (name: field) => ([
         styles.input,
         focusedInput === name && styles.inputFocused // Apply highlight if focused
     ]);
@@ -24,6 +55,8 @@ const SignUp = () => {
                 }} />
             </TouchableOpacity>
 
+
+
             <Text style={styles.text}>Create your account</Text>
             <Text style={{ fontSize: 16, color: '#666', marginTop: 10 }}>
                 Please enter your details to create an account.
@@ -36,6 +69,8 @@ const SignUp = () => {
                     style={getInputStyle('firstName')}
                     onFocus={() => setFocusedInput('firstName')}
                     onBlur={() => setFocusedInput(null)}
+                    value={firstName}
+                    onChangeText={setFirstName}
                 />
             </View>
 
@@ -46,6 +81,8 @@ const SignUp = () => {
                     style={getInputStyle('lastName')}
                     onFocus={() => setFocusedInput('lastName')}
                     onBlur={() => setFocusedInput(null)}
+                    value={lastName}
+                    onChangeText={setLastName}
                 />
             </View>
 
@@ -56,6 +93,8 @@ const SignUp = () => {
                     style={getInputStyle('email')}
                     onFocus={() => setFocusedInput('email')}
                     onBlur={() => setFocusedInput(null)}
+                    value={email}
+                    onChangeText={setEmail}
                 />
             </View>
 
@@ -67,19 +106,25 @@ const SignUp = () => {
                     secureTextEntry
                     onFocus={() => setFocusedInput('password')}
                     onBlur={() => setFocusedInput(null)}
+                    value={password}
+                    onChangeText={setPassword}
                 />
             </View>
 
             {/* Password requirements */}
-            <View style={{ flexDirection: 'column', gap: 5 }}>
+            <View style={{ flexDirection: 'column', gap: 5, marginTop: 10 }}>
                 <Text style={{ color: 'gray' }}>alphanumeric characters</Text>
                 <Text style={{ color: 'gray' }}>1 special character</Text>
                 <Text style={{ color: 'gray' }}>more than 7 characters</Text>
                 <Text style={{ color: 'gray' }}>at least 1 capital letter</Text>
             </View>
-
+            {error && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            )}
             {/* Create Account Button */}
-            <TouchableOpacity style={styles.button}>
+            <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                 <Text style={{ fontSize: 16, color: '#fff', fontWeight: 'bold' }}>Create Account</Text>
             </TouchableOpacity>
 
@@ -89,8 +134,18 @@ const SignUp = () => {
                 alignItems: 'center',
                 flexDirection: 'row',
                 justifyContent: 'center',
+                gap: 5
             }}>
-                <Text>Already have an account? <Link href="/(auth)/sign-in" style={{ color: 'blue' }}>Login</Link></Text>
+                <Text style={{
+                    fontSize: 16, color: '#333', fontWeight: 'bold'
+                }} >Already have an account?</Text>
+                <Pressable onPress={() => router.back()}>
+                    <Text style={{
+                        fontSize: 16,
+                        fontWeight: 'bold',
+                        color: 'blue',
+                    }} >Login</Text>
+                </Pressable>
             </View>
         </View>
     )
@@ -103,7 +158,6 @@ const styles = StyleSheet.create({
         flex: 1,
         padding: 20,
         paddingHorizontal: 25,
-        gap: 15,
         backgroundColor: '#fff',
     },
     text: {
@@ -129,11 +183,23 @@ const styles = StyleSheet.create({
         borderColor: 'black', // Blue highlight on focus
     },
     button: {
-        marginTop: 30,
+        marginTop: 10,
         backgroundColor: 'black',
         padding: 15,
         borderRadius: 10,
         elevation: 5,
         alignItems: 'center',
-    }
+    },
+    errorContainer: {
+        backgroundColor: '#ffebee',
+        padding: 10,
+        marginVertical: 10,
+        borderRadius: 5,
+        borderLeftWidth: 4,
+        borderLeftColor: '#f44336',
+    },
+    errorText: {
+        color: '#c62828',
+        fontSize: 14,
+    },
 });

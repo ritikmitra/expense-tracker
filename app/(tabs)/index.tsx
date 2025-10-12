@@ -1,11 +1,13 @@
+import useAuthStore from '@/store/useAuthStore'
 import useExpenseStore, { Expense } from '@/store/useExpenseStore'
 import { currentGreeting, formatTime, getDeviceCurrencySymbol } from '@/util/lib'
-import { Image } from 'expo-image'
-import React, { useRef, useState } from 'react'
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import CalendarModal from '../(modal)/CalendarModal'
-import ExpenseBottomSheet from '../(expenses)/BottomSheetModal'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
+import { Image } from 'expo-image'
+import { StatusBar } from 'expo-status-bar'
+import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import ExpenseBottomSheet from '../(expenses)/BottomSheetModal'
+import CalendarModal from '../(modal)/CalendarModal'
 import { categories } from '../(modal)/CategoryModal'
 
 
@@ -18,6 +20,7 @@ const Index = () => {
 
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const bottomSheetRef = useRef<BottomSheetModal>(null)
+  const expenses = useExpenseStore((state) => state.expenses)
 
   const openExpenseDetails = (expense: Expense) => {
     setSelectedExpense(expense)
@@ -28,7 +31,45 @@ const Index = () => {
     setActiveFilter(filter)
   }
 
-  const expenses = useExpenseStore((state) => state.expenses)
+  const { profile } = useAuthStore()
+
+  const { fetchExpenses } = useExpenseStore()
+
+  useEffect(() => {
+    fetchExpenses()
+  }, [fetchExpenses])
+
+  // Filter expenses based on selected time period
+  const filteredExpenses = useMemo(() => {
+    const currentDate = new Date()
+    const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
+    
+    return expenses.filter((expense) => {
+      const expenseDate = new Date(expense.date)
+      
+      switch (activeFilter) {
+        case 'Today':
+          return expenseDate >= today
+        case 'This Week':
+          const startOfWeek = new Date(today)
+          startOfWeek.setDate(today.getDate() - today.getDay())
+          const endOfWeek = new Date(startOfWeek)
+          endOfWeek.setDate(startOfWeek.getDate() + 7)
+          return expenseDate >= startOfWeek && expenseDate < endOfWeek
+        case 'This Month':
+          const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+          const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
+          return expenseDate >= startOfMonth && expenseDate < endOfMonth
+        default:
+          return expenseDate >= today
+      }
+    })
+  }, [expenses, activeFilter])
+
+  // Calculate total spend for filtered period
+  const totalSpend = useMemo(() => {
+    return filteredExpenses.reduce((total, expense) => total + expense.amount, 0)
+  }, [filteredExpenses])
 
   const getFilterDate = () => {
     const currentDate = new Date()
@@ -50,11 +91,12 @@ const Index = () => {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Image source={require('../../assets/images/icon.png')} style={styles.headerImg} />
+    <View style={styles.container} > 
+      <StatusBar style="light" />
+      <View style={styles.header}>    
+        <Image source={require('../../assets/images/icon.png')} style={styles.headerImg}  />
         <View style={styles.innerHeader}>
-          <Text style={styles.headerText}>{currentGreeting()}, John</Text>
+          <Text style={styles.headerText}>{currentGreeting()}, {profile?.firstName}</Text>
           <Text style={styles.headerDescription}>Track your expenses, start your day right</Text>
         </View>
       </View >
@@ -84,16 +126,16 @@ const Index = () => {
       </View>
       <View style={styles.spendContainer}>
         <Text style={styles.spendText}>Spend so far</Text>
-        <Text style={styles.spendAmount}>{getDeviceCurrencySymbol()}1,200</Text>
+        <Text style={styles.spendAmount}>{getDeviceCurrencySymbol()}{totalSpend.toFixed(2)}</Text>
       </View>
       <View style={styles.spendListContainer}>
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
 
         {
-          expenses.map((expense) => (
+          filteredExpenses.map((expense) => (
             <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Text style={{ fontSize : 25}}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
+                <Text style={{ fontSize: 25 }}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
                 <View style={{ gap: 1 }}>
                   <Text style={{
                     color: '#333',
@@ -119,7 +161,7 @@ const Index = () => {
           setCalendarModalVisible={setCalendarModalVisible}
         />
       </Modal>
-      <ExpenseBottomSheet expense={selectedExpense} ref={bottomSheetRef} />
+      <ExpenseBottomSheet expenseId={selectedExpense?.id} ref={bottomSheetRef} />
     </View>
   )
 }
