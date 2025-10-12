@@ -1,6 +1,6 @@
 import { db } from '@/config/firebaseConfig';
 import { secureStorage } from '@/util/lib';
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid/non-secure';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
@@ -34,8 +34,9 @@ const useExpenseStore = create<Store>()(
 
         const newExpense = { id: nanoid(), ...expense };
 
-        //add to firestore
-        await addDoc(collection(db, 'users', user.uid, 'expenses'), newExpense);
+        // Use setDoc with your own ID as the Firestore document ID
+        const docRef = doc(db, 'users', user.uid, 'expenses', newExpense.id);
+        await setDoc(docRef, newExpense);
 
         //update local state
         set({ expenses: [newExpense, ...get().expenses] });
@@ -46,6 +47,8 @@ const useExpenseStore = create<Store>()(
 
         // Remove from Firestore
         const docRef = doc(db, "users", user.uid, "expenses", id);
+
+
         await deleteDoc(docRef);
 
         //update local state
@@ -58,8 +61,9 @@ const useExpenseStore = create<Store>()(
 
         // Update in Firestore
         const docRef = doc(db, "users", user.uid, "expenses", id);
-        await updateDoc(docRef, updates);
 
+        await updateDoc(docRef, updates);
+     
         // Update local state
         set({
           expenses: get().expenses.map((expense) =>

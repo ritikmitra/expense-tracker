@@ -31,7 +31,7 @@ const Index = () => {
     setActiveFilter(filter)
   }
 
-  const { profile , logout} = useAuthStore()
+  const { profile } = useAuthStore()
 
   const { fetchExpenses } = useExpenseStore()
 
@@ -161,7 +161,7 @@ const Index = () => {
           setCalendarModalVisible={setCalendarModalVisible}
         />
       </Modal>
-      <ExpenseBottomSheet expense={selectedExpense} ref={bottomSheetRef} />
+      <ExpenseBottomSheet expenseId={selectedExpense?.id} ref={bottomSheetRef} />
     </View>
   )
 }

@@ -1,6 +1,5 @@
-// ExpenseBottomSheet.tsx
-import React, { forwardRef } from 'react';
-import { Text, StyleSheet, View, TouchableOpacity } from 'react-native';
+import React, { forwardRef, useState } from 'react';
+import { Text, StyleSheet, View, TouchableOpacity, Modal } from 'react-native';
 import {
     BottomSheetModal,
     BottomSheetView,
@@ -12,13 +11,22 @@ import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import useExpenseStore from '@/store/useExpenseStore';
 import useAuthStore from '@/store/useAuthStore';
 import { signOutFromGoogle } from "@/util/googleAuth"
+import ExpenseEditModal from '../(modal)/ExpenseEditModal';
 
 interface ExpenseBottomSheetProps {
-    expense: { id: string; description: string; amount: number; date: string; category: string } | null
+    expenseId: string | undefined;
 }
 
 const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>(
-    ({ expense }, ref) => {
+    ({ expenseId }, ref) => {
+
+
+        const expense = useExpenseStore(
+            (state) => state.expenses.find((e) => e.id === expenseId) || null
+        );
+
+        const [expenseEditModal, setExpenseEditModal] = useState(false)
+
         const deleteExpense = useExpenseStore((state) => state.deleteExpense);
 
         const headerHeight = useHeaderHeight()
@@ -38,6 +46,11 @@ const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>
                 topInset={headerHeight}
                 backdropComponent={BlurredBackground}
                 name='bottomsheetexpensemodal'
+                detached
+                bottomInset={20}
+                style={{
+                    marginHorizontal: 10
+                }}
             >
                 <BottomSheetView style={styles.contentContainer}>
                     {expense ? (
@@ -70,8 +83,8 @@ const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>
                                 }}>Transaction Date</Text>
                                 <Text style={styles.date}>{formatDate(expense.date)}</Text>
                             </View>
-                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, flex: 1, gap: 10 }}>
-                                <TouchableOpacity onPress={() => { logout(); signOutFromGoogle(); }} style={styles.modifyButton}>
+                            <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10, flex: 1, gap: 10, marginBottom: 20 }}>
+                                <TouchableOpacity onPress={() => setExpenseEditModal(true)} style={styles.modifyButton}>
                                     <FontAwesome5 name="edit" size={18} color="black" />
                                     <Text style={{ color: 'black', fontSize: 14 }}>Modify</Text>
                                 </TouchableOpacity>
@@ -85,6 +98,13 @@ const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>
                         <Text>No expense selected</Text>
                     )}
                 </BottomSheetView>
+                <Modal
+                    visible={expenseEditModal}
+                    transparent
+                    animationType='slide'
+                    onRequestClose={() => setExpenseEditModal(false)}>
+                    <ExpenseEditModal ExpenseDetailsProps={expense} setExpenseEditModal={setExpenseEditModal} />
+                </Modal>
             </BottomSheetModal>
         );
     }
@@ -94,7 +114,7 @@ const styles = StyleSheet.create({
     contentContainer: {
         flex: 1,
         alignItems: 'center',
-        justifyContent: 'center',
+        justifyContent: 'center'
     },
     title: {
         fontSize: 15,
