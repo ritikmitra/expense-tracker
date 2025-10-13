@@ -3,12 +3,13 @@ import useExpenseStore, { Expense } from '@/store/useExpenseStore'
 import { currentGreeting, formatTime, getDeviceCurrencySymbol } from '@/util/lib'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
+import { DrawerActions, useNavigation } from "@react-navigation/native"
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
-import ExpenseBottomSheet from '../(expenses)/BottomSheetModal'
-import CalendarModal from '../(modal)/CalendarModal'
-import { categories } from '../(modal)/CategoryModal'
+import ExpenseBottomSheet from '../../(expenses)/BottomSheetModal'
+import CalendarModal from '../../(modal)/CalendarModal'
+import { categories } from '../../(modal)/CategoryModal'
 
 
 const Index = () => {
@@ -21,6 +22,8 @@ const Index = () => {
   const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null)
   const bottomSheetRef = useRef<BottomSheetModal>(null)
   const expenses = useExpenseStore((state) => state.expenses)
+
+  const navigation = useNavigation()
 
   const openExpenseDetails = (expense: Expense) => {
     setSelectedExpense(expense)
@@ -43,10 +46,10 @@ const Index = () => {
   const filteredExpenses = useMemo(() => {
     const currentDate = new Date()
     const today = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())
-    
+
     return expenses.filter((expense) => {
       const expenseDate = new Date(expense.date)
-      
+
       switch (activeFilter) {
         case 'Today':
           return expenseDate >= today
@@ -91,10 +94,12 @@ const Index = () => {
   }
 
   return (
-    <View style={styles.container} > 
-      <StatusBar style="light" />
-      <View style={styles.header}>    
-        <Image source={require('../../assets/images/icon.png')} style={styles.headerImg}  />
+    <View style={styles.container} >
+      <StatusBar style="dark" />
+      <View style={styles.header}>
+        <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+          <Image source={require('../../../assets/images/icon.png')} style={styles.headerImg} />
+        </TouchableOpacity>
         <View style={styles.innerHeader}>
           <Text style={styles.headerText}>{currentGreeting()}, {profile?.firstName}</Text>
           <Text style={styles.headerDescription}>Track your expenses, start your day right</Text>

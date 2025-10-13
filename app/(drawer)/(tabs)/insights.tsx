@@ -1,8 +1,8 @@
 import useExpenseStore from '@/store/useExpenseStore';
 import { getDeviceCurrencySymbol } from '@/util/lib';
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { categories } from '../(modal)/CategoryModal';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { categories } from '../../(modal)/CategoryModal';
 
 
 

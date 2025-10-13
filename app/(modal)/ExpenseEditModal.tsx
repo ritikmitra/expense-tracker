@@ -105,8 +105,7 @@ export default function ExpenseEditModal({
 
         <View style={styles.buttonRow}>
           <TouchableOpacity
-            onPress={logout}
-            // onPress={() => setExpenseEditModal(false)}
+            onPress={() => setExpenseEditModal(false)}
             style={styles.cancelButton}
           >
             <MaterialCommunityIcons name="cancel" size={18} color="red" />

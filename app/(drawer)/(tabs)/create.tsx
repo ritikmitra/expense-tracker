@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, Modal } from 'react-native'
-import React, { useState } from 'react'
+import useExpenseStore from '@/store/useExpenseStore';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import CategoryModal, { categories } from '../(modal)/CategoryModal';
-import useExpenseStore from '@/store/useExpenseStore';
+import React, { useState } from 'react';
+import { Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import CategoryModal, { categories } from '../../(modal)/CategoryModal';
 
 
 const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<React.SetStateAction<boolean>> }) => {

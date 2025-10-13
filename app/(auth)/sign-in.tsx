@@ -30,7 +30,7 @@ const SignIn = () => {
         try {
             setError(null);
             await login(email, password);
-            router.replace("/(tabs)");
+            router.replace("/(drawer)/(tabs)");
         } catch (err: any) {
             if (err instanceof FirebaseError) {
                 if (err.code === 'auth/user-not-found') {
@@ -54,7 +54,7 @@ const SignIn = () => {
             if (result && result.idToken) {
                 // Sign in with Firebase using the ID token
                 await signInWithGoogle(result.idToken);
-                router.replace("/(tabs)");
+                router.replace("/(drawer)/(tabs)");
             } else {
                 throw new Error('Failed to get ID token from Google');
             }

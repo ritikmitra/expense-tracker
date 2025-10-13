@@ -28,7 +28,7 @@ const SignUp = () => {
             setError(null);
             await signUp(email, password, firstName, lastName); // Firebase sign up
             // ✅ You could also save firstName + lastName in Firestore later
-            router.replace("/(tabs)"); // redirect after success
+            router.replace("/(drawer)/(tabs)"); // redirect after success
 
         } catch (err: any) {
             console.error("Sign up error:", err);

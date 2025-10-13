@@ -117,3 +117,36 @@ export function getEmoji(emojiNames: string) {
             return "📎"
     }
 }
+
+
+export function getAvatarColors(name : string) {
+    // Hash the name to generate a color
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  // Convert hash to 6-digit hex color (background)
+  let bgColor = '';
+  for (let i = 0; i < 3; i++) {
+    const value = (hash >> (i * 8)) & 0xFF;
+    const hex = '00' + value.toString(16);
+    bgColor += hex.slice(-2); // Use slice instead of substr
+  }
+
+  // Convert hex to RGB for contrast calculation
+  const r = parseInt(bgColor.slice(0, 2), 16);
+  const g = parseInt(bgColor.slice(2, 4), 16);
+  const b = parseInt(bgColor.slice(4, 6), 16);
+
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
+
+  // Choose text color based on luminance
+  const textColor = luminance > 186 ? '000000' : 'FFFFFF';
+
+  return {
+    background: bgColor.toUpperCase(), // e.g., "A1C3D4"
+    text: textColor                    // e.g., "FFFFFF" or "000000"
+  };
+}
