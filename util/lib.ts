@@ -119,7 +119,7 @@ export function getEmoji(emojiNames: string) {
 }
 
 
-export function getAvatarColors(name : string) {
+function getAvatarColors(name : string) {
     // Hash the name to generate a color
   let hash = 0;
   for (let i = 0; i < name.length; i++) {
@@ -150,3 +150,10 @@ export function getAvatarColors(name : string) {
     text: textColor                    // e.g., "FFFFFF" or "000000"
   };
 }
+
+
+export const fallbacksIntialUrls = (firstName?: string, lastName?: string) => {
+    const { background, text } = getAvatarColors(`${firstName}+${lastName}`);
+
+    return `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=${background}&color=${text}`
+  }

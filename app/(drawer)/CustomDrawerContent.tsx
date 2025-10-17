@@ -4,8 +4,8 @@ import { DrawerContentComponentProps, DrawerContentScrollView, DrawerItem } from
 import { Ionicons } from "@expo/vector-icons";
 import useAuthStore from "@/store/useAuthStore";
 import { signOutFromGoogle } from "@/util/googleAuth";
-import { getAvatarColors } from "@/util/lib";
 import { DrawerActions } from "@react-navigation/native";
+import { fallbacksIntialUrls } from "@/util/lib";
 
 
 
@@ -13,11 +13,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
 
   const { profile, user, logout } = useAuthStore()
 
-  const fallbacksIntialUrls = (firstName?: string, lastName?: string) => {
-    const { background, text } = getAvatarColors(`${firstName}+${lastName}`);
-
-    return `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=${background}&color=${text}`
-  }
+  
 
   return (
     <DrawerContentScrollView
@@ -56,6 +52,13 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
             <Ionicons name="information-circle-outline" color={color} size={size} />
           )}
           onPress={() => props.navigation.navigate("about")}
+        />
+        <DrawerItem
+          label="Chat"
+          icon={({ color, size }) => (
+            <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
+          )}
+          onPress={() => props.navigation.navigate("chat")}
         />
       </View>
 

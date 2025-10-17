@@ -26,7 +26,7 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
 
   const handleAddExpense = () => {
 
-    
+
     if (!amount || !description || !selectedCategory) {
       alert('Please fill all fields');
       return;
@@ -58,8 +58,8 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
   };
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => setModalVisible(false)}>
-        <MaterialIcons name='cancel' size={24} style={{ marginBottom: 10 }} />
+      <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginBottom: 10 , width : 25}} >
+        <MaterialIcons name='cancel' size={24} />
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Add new Expense</Text>
       <Text style={styles.headerDescription}>

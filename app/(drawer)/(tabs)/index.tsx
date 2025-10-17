@@ -1,12 +1,12 @@
 import useAuthStore from '@/store/useAuthStore'
 import useExpenseStore, { Expense } from '@/store/useExpenseStore'
-import { currentGreeting, formatTime, getDeviceCurrencySymbol } from '@/util/lib'
+import { currentGreeting, fallbacksIntialUrls, formatTime, getDeviceCurrencySymbol } from '@/util/lib'
 import { BottomSheetModal } from '@gorhom/bottom-sheet'
 import { Image } from 'expo-image'
 import { DrawerActions, useNavigation } from "@react-navigation/native"
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import ExpenseBottomSheet from '../../(expenses)/BottomSheetModal'
 import CalendarModal from '../../(modal)/CalendarModal'
 import { categories } from '../../(modal)/CategoryModal'
@@ -34,7 +34,7 @@ const Index = () => {
     setActiveFilter(filter)
   }
 
-  const { profile } = useAuthStore()
+  const { profile, user } = useAuthStore()
 
   const { fetchExpenses } = useExpenseStore()
 
@@ -97,9 +97,9 @@ const Index = () => {
     <View style={styles.container} >
       <StatusBar style="dark" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <Image source={require('../../../assets/images/icon.png')} style={styles.headerImg} />
-        </TouchableOpacity>
+        <Pressable android_ripple={{ color: "#eee" }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+          <Image source={{ uri: user?.photoURL || fallbacksIntialUrls(profile?.firstName, profile?.lastName) }} style={styles.headerImg} />
+        </Pressable>
         <View style={styles.innerHeader}>
           <Text style={styles.headerText}>{currentGreeting()}, {profile?.firstName}</Text>
           <Text style={styles.headerDescription}>Track your expenses, start your day right</Text>
