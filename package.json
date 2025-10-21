@@ -11,6 +11,7 @@
     "lint": "expo lint"
   },
   "dependencies": {
+    "@expo/react-native-action-sheet": "^4.1.1",
     "@expo/vector-icons": "^14.1.0",
     "@gorhom/bottom-sheet": "^5.2.3",
     "@react-native-async-storage/async-storage": "^1.24.0",
@@ -20,6 +21,7 @@
     "@react-navigation/drawer": "^7.5.9",
     "@react-navigation/elements": "^2.6.2",
     "@react-navigation/native": "^7.1.17",
+    "axios": "^1.12.2",
     "date-fns": "^4.1.0",
     "expo": "~53.0.20",
     "expo-auth-session": "^6.2.1",
@@ -47,6 +49,7 @@
     "react-native-calendars": "^1.1313.0",
     "react-native-gesture-handler": "~2.24.0",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
+    "react-native-marked": "^7.0.2",
     "react-native-reanimated": "~3.17.4",
     "react-native-safe-area-context": "5.4.0",
     "react-native-screens": "~4.11.1",

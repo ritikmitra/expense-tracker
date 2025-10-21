@@ -30,6 +30,7 @@ export default function DrawerLayout() {
       <Drawer.Screen name="settings" options={{ title: "Settings", headerShown: false }} />
       <Drawer.Screen name="about" options={{ title: "About" , headerShown : false , drawerStyle : {display : "none"} }} />
       <Drawer.Screen name="chat" options={{ title: "Chat", headerShown : false }} />
+      <Drawer.Screen name="chatbox" options={{ title: "Chatbox", headerShown : false }} />
     </Drawer>
   );
 }

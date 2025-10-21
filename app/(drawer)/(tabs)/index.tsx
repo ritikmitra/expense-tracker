@@ -6,11 +6,53 @@ import { Image } from 'expo-image'
 import { DrawerActions, useNavigation } from "@react-navigation/native"
 import { StatusBar } from 'expo-status-bar'
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import { Modal, Pressable, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { Modal, Pressable, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import ExpenseBottomSheet from '../../(expenses)/BottomSheetModal'
 import CalendarModal from '../../(modal)/CalendarModal'
 import { categories } from '../../(modal)/CategoryModal'
+import { MaterialCommunityIcons } from '@expo/vector-icons'
 
+// Floating button component
+function FloatingAIButton() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <>
+      {/* Floating button */}
+      <TouchableOpacity
+        style={styles.floatingButton}
+        onPress={() => setOpen(true)}
+        activeOpacity={0.7}
+      >
+        {/* <Text style={styles.floatingButtonText}>🤖</Text> */}
+        <MaterialCommunityIcons name='chat-outline' size={34} />
+      </TouchableOpacity>
+
+      {/* Modal for AI popup */}
+      <Modal
+        visible={open}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setOpen(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalBox}>
+            <Text style={styles.modalTitle}>AI Assistant</Text>
+            <Text style={styles.modalContent}>
+              👋 Hello! How can I assist you today?
+            </Text>
+            <TouchableOpacity
+              onPress={() => setOpen(false)}
+              style={styles.closeButton}
+            >
+              <Text style={styles.closeText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+    </>
+  );
+}
 
 const Index = () => {
   const [activeFilter, setActiveFilter] = useState('Today')
@@ -135,26 +177,27 @@ const Index = () => {
       </View>
       <View style={styles.spendListContainer}>
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
-
-        {
-          filteredExpenses.map((expense) => (
-            <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-                <Text style={{ fontSize: 25 }}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
-                <View style={{ gap: 1 }}>
-                  <Text style={{
-                    color: '#333',
-                  }}>{expense.description}</Text>
-                  <Text style={{
-                    color: '#666',
-                    fontSize: 10,
-                  }}>{formatTime(expense.date)}</Text>
+        <ScrollView style={{ flexGrow: 1,paddingHorizontal : 5 }}>
+          {
+            filteredExpenses.map((expense) => (
+              <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+                  <Text style={{ fontSize: 25 }}>{categories.find((category) => category.name === expense.category)?.emoji}</Text>
+                  <View style={{ gap: 1 }}>
+                    <Text style={{
+                      color: '#333',
+                    }}>{expense.description}</Text>
+                    <Text style={{
+                      color: '#666',
+                      fontSize: 10,
+                    }}>{formatTime(expense.date)}</Text>
+                  </View>
                 </View>
-              </View>
-              <Text>{getDeviceCurrencySymbol()}{expense.amount}</Text>
-            </TouchableOpacity>
-          ))
-        }
+                <Text>{getDeviceCurrencySymbol()}{expense.amount}</Text>
+              </TouchableOpacity>
+            ))
+          }
+        </ScrollView>
       </View>
       <Modal
         visible={calendarModalVisible}
@@ -166,6 +209,7 @@ const Index = () => {
           setCalendarModalVisible={setCalendarModalVisible}
         />
       </Modal>
+      <FloatingAIButton />
       <ExpenseBottomSheet expenseId={selectedExpense?.id} ref={bottomSheetRef} />
     </View>
   )
@@ -268,5 +312,57 @@ const styles = StyleSheet.create({
     padding: 10,
     boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
     justifyContent: 'space-between',
+    marginTop:10
+  },
+  floatingButton: {
+    position: "absolute",
+    bottom: 20,
+    right: 20,
+    backgroundColor: "#4959e9ff",
+    width: 50,
+    height: 50,
+    borderRadius: 32.5,
+    justifyContent: "center",
+    alignItems: "center",
+    shadowColor: "#000",
+    shadowOpacity: 0.3,
+    shadowOffset: { width: 0, height: 3 },
+    shadowRadius: 5,
+    elevation: 5,
+  },
+  floatingButtonText: {
+    color: "#fff",
+    fontSize: 30,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBox: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    padding: 20,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  modalContent: {
+    fontSize: 16,
+    marginBottom: 15,
+  },
+  closeButton: {
+    backgroundColor: "#523c86ff",
+    borderRadius: 8,
+    padding: 10,
+  },
+  closeText: {
+    color: "#fff",
+    textAlign: "center",
+    fontWeight: "bold",
   },
 })
