@@ -67,6 +67,13 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
           )}
           onPress={() => props.navigation.navigate("chatbox")}
         />
+        <DrawerItem
+          label="GiftedChatbox"
+          icon={({ color, size }) => (
+            <Ionicons name="chatbubble-ellipses" color={color} size={size} />
+          )}
+          onPress={() => props.navigation.navigate("giftedchatbox")}
+        />
       </View>
 
       {/* Logout Section */}

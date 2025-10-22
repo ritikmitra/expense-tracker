@@ -12,7 +12,6 @@
       "supportsTablet": true
     },
     "android": {
-      "softwareKeyboardLayoutMode": "pan",
       "package": "com.ritik.expensetracker",
       "versionCode": 1,
       "adaptiveIcon": {

@@ -1,338 +1,260 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { MaterialIcons } from '@expo/vector-icons';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
-  TextInput,
   Text,
-  StyleSheet,
-  FlatList,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
   KeyboardAvoidingView,
   Platform,
-  TouchableWithoutFeedback,
+  StyleSheet,
+  useWindowDimensions,
   Keyboard,
-  Pressable,
 } from 'react-native';
-import axios from 'axios';
-import Animated, { FadeInUp } from 'react-native-reanimated';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import useExpenseStore from '@/store/useExpenseStore';
-import { useNavigation } from 'expo-router';
-import Markdown from "react-native-marked";
+import { KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-interface Message {
-  id: number;
-  text: string;
-  sender: 'user' | 'bot';
-  timestamp: string;
-}
 
-const Chat = () => {
-  const { expenses } = useExpenseStore();
-  const [userInput, setUserInput] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [loading, setLoading] = useState(false);
-  const flatListRef = useRef<FlatList>(null);
+export default function ChatUI() {
 
-  const navigate = useNavigation()
 
-  const GreetingMessage = `
- 👋 **Hello there!**  
-Welcome back to your **Expense Tracker Assistant** 💰  
 
-I'm here to help you manage your finances with ease.  
-You can ask me things like:
 
-- 💵 *"Add an expense for groceries"*  
-- 📊 *"Show my total expenses this week"*  
-- 🧾 *"List my health-related expenses"*  
 
-Let's make tracking your spending simple and smart! 🚀
-`;
+  const { height } = useWindowDimensions()
+
+
+
+
+  const [messages, setMessages] = useState([
+    { id: 1, text: "Hey! How can I help you today?", sender: 'other', timestamp: new Date(Date.now() - 3600000) },
+    { id: 2, text: "Hi! I'm looking for some information.", sender: 'user', timestamp: new Date(Date.now() - 3500000) },
+    { id: 3, text: "Of course! What would you like to know?", sender: 'other', timestamp: new Date(Date.now() - 3400000) }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const scrollViewRef = useRef<ScrollView>(null);
 
   useEffect(() => {
-
-    if (messages.length > 1) return
-
-    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { id: prevMessages.length + 1, text: GreetingMessage, sender: 'bot', timestamp: timestamp },
-    ]);
-
-    setMessages((prevMessages) => [
-      ...prevMessages,
-      { id: prevMessages.length + 1, text: GreetingMessage, sender: 'user', timestamp: timestamp },
-    ]);
-
-  }, [GreetingMessage])
+    scrollViewRef.current?.scrollToEnd({ animated: true });
+  }, [messages]);
 
 
-  const sendMessage = async (text: string) => {
-    setLoading(true);
-    const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    try {
-      const context = `
-        User's expenses: ${JSON.stringify(expenses)}.
-        Please answer the following query in markdown format, using clear lists and bold labels.
-        Query:`;
-      console.log(expenses);
-
-      const response = await axios.post(
-        `${process.env.EXPO_PUBLIC_GEMINI_MODEL_URL}`,
-        {
-          contents: [
-            {
-              role: "user",
-              parts: [{ text: context + '\n\n' + text }],
-            },
-          ],
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'x-goog-api-key': `${process.env.EXPO_PUBLIC_GEMINI_PUBLIC_KEY}`
-          },
-        }
-      );
-
-      const botMessage = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
-        "Sorry, I didn't quite understand that.";
-
-      console.log(botMessage);
-
-
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { id: prevMessages.length + 1, text: botMessage, sender: 'bot', timestamp },
-      ]);
-    } catch (error) {
-      console.error('Error sending message:', error);
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { id: prevMessages.length + 1, text: 'Oops! Something went wrong.', sender: 'bot', timestamp },
-      ]);
-    }
-    setLoading(false);
-  };
 
   const handleSend = () => {
-    if (userInput.trim()) {
-      const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { id: prevMessages.length + 1, text: userInput, sender: 'user', timestamp },
-      ]);
-      sendMessage(userInput);
-      setUserInput('');
+    if (inputText.trim()) {
+      const newMessage = {
+        id: messages.length + 1,
+        text: inputText,
+        sender: 'user',
+        timestamp: new Date(),
+      };
+      setMessages([...messages, newMessage]);
+      setInputText('');
+
+      // Simulated bot response
+      setTimeout(() => {
+        const response = {
+          id: messages.length + 2,
+          text: "Thanks for your message! This is a demo response.",
+          sender: 'other',
+          timestamp: new Date(),
+        };
+        setMessages(prev => [...prev, response]);
+      }, 1000);
     }
   };
 
-  const renderTypingIndicator = () => (
-    <View style={styles.typingContainer}>
-      <Text style={styles.typingText}>Bot is typing...</Text>
-      <View style={styles.typingDots}>
-        <Animated.View style={[styles.dot, { animationDelay: '0ms' }]} />
-        <Animated.View style={[styles.dot, { animationDelay: '200ms' }]} />
-        <Animated.View style={[styles.dot, { animationDelay: '400ms' }]} />
-      </View>
-    </View>
-  );
+  const formatTime = (date: Date) => {
+    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+  };
+
+
+
+
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
-    >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.container}>
-          {/* Header */}
-          <View style={styles.header}>
-            <Pressable onPress={() => navigate.goBack()}>
-              <MaterialCommunityIcons name="arrow-left" size={30} />
-            </Pressable>
-            <Text style={styles.headerText}>Home</Text>
+    <View style={[styles.container]}>
+      {/* Header */}
+      <View style={styles.header}>
+        <View style={styles.headerContent}>
+          <View style={styles.avatar}>
+            <MaterialIcons name='verified-user' size={24} />
           </View>
-
-          {/* Messages List */}
-          <FlatList
-            ref={flatListRef}
-            data={messages.slice().reverse()}
-            keyExtractor={(item) => item.id.toString()}
-            renderItem={({ item }) => (
-              <Animated.View entering={FadeInUp.duration(300)} style={[
-                styles.messageContainer,
-                item.sender === 'user' ? styles.userMessage : styles.botMessage,
-              ]}>
-                {/* <Text style={[styles.messageText, item.sender === 'user' ? styles.userMessageText : styles.botMessageText]}>{item.text}</Text> */}
-                {item.sender === 'bot' ? (
-                  <Markdown value={item.text} />
-                ) : (
-                  <Text style={[styles.messageText, styles.userMessageText]}>
-                    {item.text}
-                  </Text>
-                )}
-                <Text style={styles.timestamp}>{item.timestamp}</Text>
-              </Animated.View>
-            )}
-            inverted
-            contentContainerStyle={styles.messageList}
-            keyboardShouldPersistTaps="handled"
-          />
-
-          {/* Loading Indicator */}
-          {loading && renderTypingIndicator()}
-
-          {/* Input Area */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.input}
-              value={userInput}
-              onChangeText={setUserInput}
-              placeholder="Type your message..."
-              placeholderTextColor="#888"
-              onSubmitEditing={handleSend}
-              returnKeyType="send"
-            />
-            <Pressable
-              onPress={handleSend}
-              style={({ pressed }) => [
-                styles.sendButton,
-                pressed && styles.sendButtonPressed,
-              ]}
-            >
-              <MaterialCommunityIcons
-                name={userInput.trim() ? 'send' : 'send-circle-outline'}
-                size={30}
-                color={userInput.trim() ? '#007AFF' : '#888'}
-              />
-            </Pressable>
+          <View>
+            <Text style={styles.headerTitle}>Chat Assistant</Text>
+            <Text style={styles.headerSubtitle}>Online</Text>
           </View>
         </View>
-      </TouchableWithoutFeedback>
-    </KeyboardAvoidingView>
+      </View>
+      <KeyboardStickyView  >
+
+      {/* Messages */}
+      <ScrollView
+        style={styles.messagesContainer}
+        contentContainerStyle={{ padding: 12,height : 80 }}
+        ref={scrollViewRef}
+        onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+      >
+        {messages.map((message) => (
+          <View
+            key={message.id}
+            style={[
+              styles.messageWrapper,
+              message.sender === 'user' ? styles.userMessageWrapper : styles.otherMessageWrapper,
+            ]}
+          >
+            <View
+              style={[
+                styles.messageBubble,
+                message.sender === 'user' ? styles.userBubble : styles.otherBubble,
+              ]}
+            >
+              <Text style={message.sender === 'user' ? styles.userText : styles.otherText}>
+                {message.text}
+              </Text>
+              <Text style={message.sender === 'user' ? styles.userTime : styles.otherTime}>
+                {formatTime(message.timestamp)}
+              </Text>
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+      
+
+        {/* Input Area */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={styles.input}
+            placeholder="Type a message..."
+            value={inputText}
+            onChangeText={setInputText}
+            onSubmitEditing={handleSend}
+            returnKeyType="send"
+          />
+          <TouchableOpacity
+            style={[styles.sendButton, !inputText.trim() && styles.disabledButton]}
+            onPress={handleSend}
+            disabled={!inputText.trim()}
+          >
+            <MaterialIcons name='send' size={20} />
+          </TouchableOpacity>
+        </View>
+      </KeyboardStickyView>
+
+    </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
-
   container: {
-    flexGrow: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#f3f4f6',
+    flex: 1
   },
   header: {
+    backgroundColor: '#2a61d6ff',
+    padding: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
+    zIndex: 1
+  },
+  headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#eef0f3ff',
-    padding: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
   },
-  headerText: {
-    fontSize: 20,
+  avatar: {
+    width: 40,
+    height: 40,
+    backgroundColor: '#3b82f6',
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 12,
+  },
+  headerTitle: {
+    color: '#fff',
+    fontSize: 18,
     fontWeight: '600',
-    marginLeft: 10,
   },
-  messageList: {
-    flexGrow: 1,
-    justifyContent: 'flex-end',
-    paddingHorizontal: 10,
-    paddingBottom: 10
+  headerSubtitle: {
+    color: '#bfdbfe',
+    fontSize: 12,
   },
-  messageContainer: {
-    padding: 12,
-    marginVertical: 5,
-    borderRadius: 15,
-    maxWidth: '80%',
+  messagesContainer: {
+  },
+  messageWrapper: {
+    marginVertical: 6,
+  },
+  userMessageWrapper: {
+    alignItems: 'flex-end',
+  },
+  otherMessageWrapper: {
+    alignItems: 'flex-start',
+  },
+  messageBubble: {
+    maxWidth: '75%',
+    borderRadius: 20,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+  },
+  userBubble: {
+    backgroundColor: '#2563eb',
+    borderBottomRightRadius: 4,
+  },
+  otherBubble: {
+    backgroundColor: '#fff',
+    borderBottomLeftRadius: 4,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
   },
-  userMessage: {
-    backgroundColor: '#293bdaff',
-    alignSelf: 'flex-end',
-    borderBottomRightRadius: 0,
+  userText: {
+    color: '#fff',
+    fontSize: 14,
   },
-  botMessage: {
-    backgroundColor: '#fff',
-    alignSelf: 'flex-start',
-    borderBottomLeftRadius: 0,
+  otherText: {
+    color: '#111827',
+    fontSize: 14,
   },
-  messageText: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  userMessageText: {
-    color: "#fff"
-  },
-  botMessageText: {
-    color: "#000"
-  },
-  timestamp: {
-    fontSize: 12,
-    color: '#888',
+  userTime: {
+    color: '#bfdbfe',
+    fontSize: 10,
+    marginTop: 4,
     textAlign: 'right',
-    marginTop: 10,
+  },
+  otherTime: {
+    color: '#6b7280',
+    fontSize: 10,
+    marginTop: 4,
+    textAlign: 'left',
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
+    padding: 12,
     borderTopWidth: 1,
-    borderColor: '#ddd',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: -1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+    borderColor: '#e5e7eb',
+    backgroundColor: '#fff',
   },
   input: {
     flex: 1,
-    height: 45,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    backgroundColor: '#f9fafb',
     borderRadius: 25,
-    paddingHorizontal: 15,
-    backgroundColor: '#f9f9f9',
-    fontSize: 16,
+    paddingHorizontal: 16,
+    paddingVertical: Platform.OS === 'ios' ? 12 : 8,
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    marginRight: 8,
   },
   sendButton: {
-    marginLeft: 10,
-    padding: 5,
+    backgroundColor: '#2563eb',
+    padding: 12,
     borderRadius: 25,
   },
-  sendButtonPressed: {
-    backgroundColor: 'rgba(0,0,0,0.1)',
-  },
-  typingContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#fff',
-    borderRadius: 15,
-    marginVertical: 5,
-    alignSelf: 'flex-start',
-    maxWidth: '80%',
-  },
-  typingText: {
-    fontSize: 14,
-    color: '#888',
-  },
-  typingDots: {
-    flexDirection: 'row',
-    marginLeft: 10,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    backgroundColor: '#888',
-    borderRadius: 3,
-    marginHorizontal: 2,
+  disabledButton: {
+    opacity: 0.5,
   },
 });
-
-export default Chat;
-

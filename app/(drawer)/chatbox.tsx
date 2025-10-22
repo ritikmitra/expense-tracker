@@ -1,9 +1,12 @@
 import ChatScreen from '@/components/chat/ChatScreen';
 import { Message } from '@/components/chat/MessageBubble';
+import useExpenseStore from '@/store/useExpenseStore';
 import { MaterialIcons } from '@expo/vector-icons';
+import axios from 'axios';
 import { useNavigation } from 'expo-router';
 import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Keyboard, Pressable, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 
 const GreetingMessage = `
@@ -21,6 +24,41 @@ Let's make tracking your spending simple and smart! 🚀
 `;
 
 export default function ChatBox() {
+    const [isKeyboardVisible, setIsKeyboardVisible] = useState(false);
+    const [keyboardHeight, setKeyboardHeight] = useState(0);
+    const { bottom, top } = useSafeAreaInsets()
+    const { expenses } = useExpenseStore();
+    const [sampleMessages, setSampleMessages] = useState<Message[]>([
+        {
+            id: '1',
+            text: GreetingMessage,
+            timestamp: new Date(Date.now() - 3600000),
+            isSent: false,
+        }
+    ]);
+    useEffect(() => {
+        const showSubscription = Keyboard.addListener('keyboardDidShow', handleKeyboardShow);
+        const hideSubscription = Keyboard.addListener('keyboardDidHide', handleKeyboardHide);
+
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove()
+        };
+    }, []);
+
+    const handleKeyboardShow = (event) => {
+        setKeyboardHeight(event.endCoordinates.height);
+        setIsKeyboardVisible(true);
+    };
+
+    const handleKeyboardHide = (event) => {
+        setKeyboardHeight(event.endCoordinates.height);
+        setIsKeyboardVisible(false);
+    };
+
+    const { height } = useWindowDimensions()
+
+    const dyanmicKeyboardHeight = top + bottom + keyboardHeight
     const navigate = useNavigation();
     const [loading, setLoading] = useState(false);
 
@@ -69,28 +107,7 @@ export default function ChatBox() {
         };
     }, [loading]);
 
-    const sampleMessages: Message[] = [
-        {
-            id: '1',
-            text: GreetingMessage,
-            timestamp: new Date(Date.now() - 3600000),
-            isSent: false,
-        },
-        {
-            id: '2',
-            text: GreetingMessage,
-            timestamp: new Date(Date.now() - 3600000),
-            isSent: true,
-        },
-    ];
-
-    const handleSendMessage = (text: string) => {
-        console.log('Message sent:', text);
-        setLoading(true)
-        setTimeout(() => {
-            setLoading(false)
-        }, 2000)
-    };
+    
 
     const renderTypingIndicator = () => (
         <View style={styles.typingContainer}>
@@ -125,19 +142,31 @@ export default function ChatBox() {
         </View>
     );
 
+
+    const dynamicStyles = StyleSheet.create({
+        flexVala: {
+            flex: 1,
+        },
+        height: {
+            height: height - dyanmicKeyboardHeight
+        }
+
+    })
+
+
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, isKeyboardVisible ? dynamicStyles.height : dynamicStyles.flexVala]}>
             {/* Header */}
             <View style={styles.header}>
                 <Pressable onPress={() => navigate.goBack()}>
                     <MaterialIcons name="arrow-back-ios-new" size={22} color="#000" />
                 </Pressable>
                 <Text style={styles.headerText}>Ex AI</Text>
+                {loading && renderTypingIndicator()}
             </View>
-            {loading && renderTypingIndicator()}
             <ChatScreen
                 initialMessages={sampleMessages}
-                onSendMessage={handleSendMessage}
+                setLoading={setLoading}
             />
         </View>
     );
@@ -145,8 +174,8 @@ export default function ChatBox() {
 
 const styles = StyleSheet.create({
     container: {
-        flex: 1,
         backgroundColor: '#FFFFFF',
+
     },
     headerTitle: {
         fontSize: 20,
@@ -169,11 +198,8 @@ const styles = StyleSheet.create({
     typingContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        padding: 10,
+        paddingHorizontal: 5,
         backgroundColor: '#fff',
-        borderRadius: 15,
-        marginVertical: 5,
-        alignSelf: 'flex-start',
         maxWidth: '80%',
     },
     typingText: {
