@@ -53,7 +53,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
           )}
           onPress={() => props.navigation.navigate("about")}
         />
-        <DrawerItem
+        {/* <DrawerItem
           label="Chat"
           icon={({ color, size }) => (
             <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
@@ -66,11 +66,11 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
             <Ionicons name="chatbubble-ellipses-sharp" color={color} size={size} />
           )}
           onPress={() => props.navigation.navigate("chatbox")}
-        />
+        /> */}
         <DrawerItem
-          label="GiftedChatbox"
+          label="Chat"
           icon={({ color, size }) => (
-            <Ionicons name="chatbubble-ellipses" color={color} size={size} />
+            <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
           )}
           onPress={() => props.navigation.navigate("giftedchatbox")}
         />

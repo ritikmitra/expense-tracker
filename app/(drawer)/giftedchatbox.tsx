@@ -1,10 +1,13 @@
-import React, { useState, useCallback, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Bubble, GiftedChat, IMessage, MessageText, User } from 'react-native-gifted-chat';
-import { View, Text, StyleSheet, Platform, Pressable ,Animated} from 'react-native';
+import { View, Text, StyleSheet, Platform, Pressable, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import ChatInput from '@/components/chat/ChatInput';
 import { useNavigation } from 'expo-router';
 import Markdown from 'react-native-marked';
+import axios from 'axios';
+import useExpenseStore from '@/store/useExpenseStore';
+import { generateUniqueId } from '@/util/lib';
 
 const GreetingMessage = `
  👋 **Hello there!**  
@@ -24,6 +27,7 @@ export default function GiftedChatUI() {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const navigate = useNavigation();
     const [loading, setLoading] = useState(false);
+    const { expenses } = useExpenseStore();
 
     // Create animated values for each dot using refs so they stay stable across renders
     const dot1 = useRef(new Animated.Value(0));
@@ -72,7 +76,7 @@ export default function GiftedChatUI() {
 
 
     const user: User = { _id: 1, name: 'You' };
-    const bot: User = { _id: 2, name: 'Chat Assistant', avatar: 'https://placeimg.com/140/140/any' };
+    const bot: User = useMemo<User>(() => ({ _id: 2, name: 'Chat Assistant', avatar: 'https://placeimg.com/140/140/any' }), []);
 
     useEffect(() => {
         // Initial messages
@@ -85,33 +89,11 @@ export default function GiftedChatUI() {
             },
 
         ]);
-    }, []);
+    }, [bot]);
 
-    // const onSend = useCallback((newMessages: IMessage[] = []) => {
-    //     setMessages(prev => GiftedChat.append(prev, newMessages));
-    //     console.log("data");
-
-
-    //     // Simulated bot response
-    //     if (newMessages[0].user._id === user._id) {
-    //         setTimeout(() => {
-    //             setMessages(prev =>
-    //                 GiftedChat.append(prev, [
-    //                     {
-    //                         _id: prev.length + 1,
-    //                         text: "Thanks for your message! This is a demo response.",
-    //                         createdAt: new Date(),
-    //                         user: bot,
-    //                     },
-    //                 ])
-    //             );
-    //         }, 1000);
-    //     }
-    // }, []);
-
-    const handleSendText = (text: string) => {
+    const handleSendText = async (text: string) => {
         const newMessage: IMessage = {
-            _id: messages.length + 1,
+            _id: generateUniqueId(),
             text,
             createdAt: new Date(),
             user,
@@ -119,17 +101,59 @@ export default function GiftedChatUI() {
         setMessages(prev => GiftedChat.append(prev, [newMessage]));
 
         setLoading(true)
-        // Simulated bot response
-        setTimeout(() => {
-            const botMessage: IMessage = {
-                _id: messages.length + 2,
-                text: "Thanks for your message! This is a demo response.",
-                createdAt: new Date(),
-                user: bot,
-            };
-            setMessages(prev => GiftedChat.append(prev, [botMessage]));
+
+        try {
+            const context = `
+        User's expenses: ${JSON.stringify(expenses)}.
+        Please answer the following query in markdown format, using clear lists and bold labels.
+        Query:`;
+            console.log(expenses);
+
+            const response = await axios.post(
+                `${process.env.EXPO_PUBLIC_GEMINI_MODEL_URL}`,
+                {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [{ text: context + '\n\n' + text }],
+                        },
+                    ],
+                },
+                {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-goog-api-key': `${process.env.EXPO_PUBLIC_GEMINI_PUBLIC_KEY}`
+                    },
+                }
+            );
+
+            const botMessage = response?.data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+                "Sorry, I didn't quite understand that.";
+
+            const botResponse: IMessage = {
+                _id: generateUniqueId(), text: botMessage, createdAt: new Date(), user: bot
+            }
+            setMessages(prev => GiftedChat.append(prev, [botResponse]));
+        } catch (error) {
+            console.error('Error sending message:', error);
+            const errorResponse: IMessage = {
+                _id: generateUniqueId(), text: `Oops! Something went wrong. ${error}`, createdAt: new Date(), user: bot
+            }
+            setMessages(prev => GiftedChat.append(prev, [errorResponse]));
+        } finally {
             setLoading(false)
-        }, 1000);
+        }
+        // Simulated bot response
+        // setTimeout(() => {
+        //     const botMessage: IMessage = {
+        //         _id: messages.length + 2,
+        //         text: "Thanks for your message! This is a demo response.",
+        //         createdAt: new Date(),
+        //         user: bot,
+        //     };
+        //     setMessages(prev => GiftedChat.append(prev, [botMessage]));
+        //     setLoading(false)
+        // }, 1000);
     };
 
     const renderInputToolbar = (props: any) => (
@@ -189,6 +213,7 @@ export default function GiftedChatUI() {
 
     const AnimatedView = Animated.createAnimatedComponent(View);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const RenderAnimatedMessage = (props: any) => {
 
         const animation = useRef(new Animated.Value(0)).current;
@@ -199,7 +224,7 @@ export default function GiftedChatUI() {
                 duration: 300,
                 useNativeDriver: true,
             }).start();
-        }, []);
+        }, [animation]);
 
         const translateY = animation.interpolate({
             inputRange: [0, 1],
@@ -230,47 +255,47 @@ export default function GiftedChatUI() {
     };
 
     const RenderAnimatedBubble = (props: any) => {
-            const animation = useRef(new Animated.Value(0)).current;
+        const animation = useRef(new Animated.Value(0)).current;
 
-            useEffect(() => {
-                Animated.spring(animation, {
-                    toValue: 1,
-                    friction: 6,
-                    tension: 70,
-                    useNativeDriver: true,
-                }).start();
-            }, []);
+        useEffect(() => {
+            Animated.spring(animation, {
+                toValue: 1,
+                friction: 6,
+                tension: 70,
+                useNativeDriver: true,
+            }).start();
+        }, [animation]);
 
-            const translateY = animation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [20, 0], // slides up from below
-            });
+        const translateY = animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [20, 0], // slides up from below
+        });
 
-            const scale = animation.interpolate({
-                inputRange: [0, 1],
-                outputRange: [0.95, 1], // slightly “pops” into place
-            });
+        const scale = animation.interpolate({
+            inputRange: [0, 1],
+            outputRange: [0.95, 1], // slightly “pops” into place
+        });
 
-            return (
-                <Animated.View
-                    style={{
-                        transform: [{ translateY }, { scale }],
+        return (
+            <Animated.View
+                style={{
+                    transform: [{ translateY }, { scale }],
+                }}
+            >
+                <Bubble
+                    {...props}
+                    wrapperStyle={{
+                        left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 },
+                        right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 },
                     }}
-                >
-                    <Bubble
-                        {...props}
-                        wrapperStyle={{
-                            left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 },
-                            right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 },
-                        }}
-                        textStyle={{
-                            left: { color: '#111827' },
-                            right: { color: '#fff' },
-                        }}
-                    />
-                </Animated.View>
-            );
-        };
+                    textStyle={{
+                        left: { color: '#111827' },
+                        right: { color: '#fff' },
+                    }}
+                />
+            </Animated.View>
+        );
+    };
 
 
     return (
@@ -291,22 +316,9 @@ export default function GiftedChatUI() {
                 placeholder="Type a message..."
                 showAvatarForEveryMessage={false}
                 renderAvatar={() => null}
-                // renderBubble={props => (
-                //     <Bubble
-                //         {...props}
-                //         wrapperStyle={{
-                //             left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 }, // bot bubble
-                //             right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 }, // user bubble
-                //         }}
-                //         textStyle={{
-                //             left: { color: '#111827' },
-                //             right: { color: '#fff' },
-                //         }}
-                //     />
-                // )}
                 renderBubble={RenderAnimatedBubble}
                 renderInputToolbar={renderInputToolbar}
-                bottomOffset={Platform.OS === 'ios' ? 0 : -25}
+                bottomOffset={Platform.OS === 'ios' ? 0 : -50}
                 keyboardShouldPersistTaps='handled'
                 renderMessageText={renderMessageText}
             />

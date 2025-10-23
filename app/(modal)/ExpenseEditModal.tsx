@@ -4,7 +4,6 @@ import { BlurView } from "expo-blur";
 import { useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Text, TextInput, Modal } from "react-native";
 import CategoryModal, { categories } from "./CategoryModal";
-import useAuthStore from "@/store/useAuthStore";
 
 interface Expense {
   id: string;
@@ -22,7 +21,6 @@ export default function ExpenseEditModal({
   setExpenseEditModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const updateExpense = useExpenseStore((state) => state.modifyExpense);
-  const {logout} = useAuthStore()
 
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");

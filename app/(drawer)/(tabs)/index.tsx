@@ -139,9 +139,11 @@ const Index = () => {
     <View style={styles.container} >
       <StatusBar style="dark" />
       <View style={styles.header}>
-        <Pressable android_ripple={{ color: "#eee" }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-          <Image source={{ uri: user?.photoURL || fallbacksIntialUrls(profile?.firstName, profile?.lastName) }} style={styles.headerImg} />
-        </Pressable>
+        <View>
+          <Pressable android_ripple={{ color: "#ccc",radius : 30,borderless : true,foreground : true }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+            <Image source={{ uri: user?.photoURL || fallbacksIntialUrls(profile?.firstName, profile?.lastName) }} style={styles.headerImg} />
+          </Pressable>
+        </View>
         <View style={styles.innerHeader}>
           <Text style={styles.headerText}>{currentGreeting()}, {profile?.firstName}</Text>
           <Text style={styles.headerDescription}>Track your expenses, start your day right</Text>
@@ -177,7 +179,7 @@ const Index = () => {
       </View>
       <View style={styles.spendListContainer}>
         <Text style={styles.filterDate}>{getFilterDate()}</Text>
-        <ScrollView style={{ flexGrow: 1,paddingHorizontal : 5 }}>
+        <ScrollView style={{ flexGrow: 1, paddingHorizontal: 5 }}>
           {
             filteredExpenses.map((expense) => (
               <TouchableOpacity onPress={() => openExpenseDetails(expense)} key={expense.id} style={styles.innerListContainer}>
@@ -209,7 +211,7 @@ const Index = () => {
           setCalendarModalVisible={setCalendarModalVisible}
         />
       </Modal>
-      <FloatingAIButton />
+      {/* <FloatingAIButton /> */}
       <ExpenseBottomSheet expenseId={selectedExpense?.id} ref={bottomSheetRef} />
     </View>
   )
@@ -237,7 +239,7 @@ const styles = StyleSheet.create({
   headerImg: {
     width: 50,
     height: 50,
-    borderRadius: 50
+    borderRadius: 50,
   },
   headerText: {
     fontSize: 18,
@@ -312,7 +314,7 @@ const styles = StyleSheet.create({
     padding: 10,
     boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
     justifyContent: 'space-between',
-    marginTop:10
+    marginTop: 10
   },
   floatingButton: {
     position: "absolute",
