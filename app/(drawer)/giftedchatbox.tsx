@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Bubble, GiftedChat, IMessage, MessageText, User } from 'react-native-gifted-chat';
+import { Bubble, GiftedChat, IMessage, InputToolbar, MessageText, User } from 'react-native-gifted-chat';
 import { View, Text, StyleSheet, Platform, Pressable, Animated } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import ChatInput from '@/components/chat/ChatInput';
@@ -8,6 +8,8 @@ import Markdown from 'react-native-marked';
 import axios from 'axios';
 import useExpenseStore from '@/store/useExpenseStore';
 import { generateUniqueId } from '@/util/lib';
+import { KeyboardAvoidingView, KeyboardStickyView } from 'react-native-keyboard-controller';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const GreetingMessage = `
  👋 **Hello there!**  
@@ -28,6 +30,7 @@ export default function GiftedChatUI() {
     const navigate = useNavigation();
     const [loading, setLoading] = useState(false);
     const { expenses } = useExpenseStore();
+    const { bottom } = useSafeAreaInsets()
 
     // Create animated values for each dot using refs so they stay stable across renders
     const dot1 = useRef(new Animated.Value(0));
@@ -318,7 +321,7 @@ export default function GiftedChatUI() {
                 renderAvatar={() => null}
                 renderBubble={RenderAnimatedBubble}
                 renderInputToolbar={renderInputToolbar}
-                bottomOffset={Platform.OS === 'ios' ? 0 : -50}
+                bottomOffset={Platform.OS === 'ios' ? 0 : -bottom}
                 keyboardShouldPersistTaps='handled'
                 renderMessageText={renderMessageText}
             />
