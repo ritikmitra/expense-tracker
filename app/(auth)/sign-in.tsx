@@ -1,12 +1,13 @@
 import useAuthStore from "@/store/useAuthStore";
 import { signInWithGoogle as googleSignIn } from "@/util/googleAuth";
-import { MaterialIcons } from "@expo/vector-icons";
+import { AntDesign } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { Link, useRouter } from "expo-router";
 import { FirebaseError } from "firebase/app";
 import { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
+import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { useGithubAuth } from "@/util/githubAuth";
+import { currentGreeting } from "@/util/lib";
 
 type field = 'email' | 'password' | null;
 
@@ -21,6 +22,8 @@ const SignIn = () => {
 
     const login = useAuthStore((state) => state.login);
     const signInWithGoogle = useAuthStore((state) => state.signInWithGoogle);
+
+    const { isLoading, promptAsync } = useGithubAuth();
 
     const handleSignIn = async () => {
         if (!email || !password) {
@@ -38,7 +41,7 @@ const SignIn = () => {
                     return;
                 }
             }
-            
+
             setError(err.message || "Something went wrong");
         }
     }
@@ -72,25 +75,53 @@ const SignIn = () => {
         focusedInput === name && styles.inputFocused // Apply highlight if focused
     ]);
 
+
     return (
-        <KeyboardAwareScrollView contentContainerStyle={styles.container}
-            enableOnAndroid={true}
-            extraScrollHeight={10}
-            keyboardShouldPersistTaps="handled"
-            extraHeight={Platform.OS === 'ios' ? 20 : 0}
-            >
-            <TouchableOpacity onPress={() => router.back()}>
-                <MaterialIcons name='arrow-back-ios-new' size={24} style={{
-                    marginBottom: 10,
-                    transform: [{ translateX: -10 }]
-                }} />
-            </TouchableOpacity>
+        <View
+            style={styles.container}
+        >
             <View>
-                <Text style={styles.text}>Hello ! Good Morning</Text>
+                <Text style={styles.text}>Hello {currentGreeting()}</Text>
                 <Text style={{ fontSize: 16, color: '#666', marginTop: 10 }}>It is great to be have here</Text>
             </View>
+
+            {error && (
+                <View style={styles.errorContainer}>
+                    <Text style={styles.errorText}>{error}</Text>
+                </View>
+            )}
+            <View style={{ flexDirection : "column",gap : 10}}>
+                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Email Address</Text>
+                <TextInput
+                    style={getInputStyle('email')}
+                    onFocus={() => setFocusedInput('email')}
+                    onBlur={() => setFocusedInput(null)}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                />
+            
+                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Password</Text>
+                <TextInput
+                    style={getInputStyle('password')}
+                    onFocus={() => setFocusedInput('password')}
+                    onBlur={() => setFocusedInput(null)}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={true}
+                    keyboardType="default"
+                />
+            </View>
+
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
+                <View>
+                    <Text style={{ width: 50, textAlign: 'center' }}>or</Text>
+                </View>
+                <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
+            </View>
+
             <View style={{
-                marginTop: 20,
                 flexDirection: 'column',
                 justifyContent: 'space-between',
                 gap: 10,
@@ -129,53 +160,19 @@ const SignIn = () => {
                     gap: 10,
                     borderRadius: 20,
                     padding: 10,
-                }}>
-                    <Image source={require("@/assets/images/icons8-facebook.svg")} style={{
-                        width: 30,
-                        height: 30,
-                    }} />
+                }}
+                    onPress={() => promptAsync({ windowName: "Expense Tracker" })}
+                >
+                    <AntDesign name="github" size={29} color="black" />
                     <Text style={{
                         fontSize: 16,
                         fontWeight: 'bold',
                         color: '#333',
-                    }}>Sign in with Facebook</Text>
+                    }}>{isLoading ? 'Signing in...' : 'Sign in with Github'}</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
-                <View>
-                    <Text style={{ width: 50, textAlign: 'center' }}>or</Text>
-                </View>
-                <View style={{ flex: 1, height: 1, backgroundColor: 'black' }} />
-            </View>
-            {error && (
-                <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
-                </View>
-            )}
-            <View >
-                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Email Address</Text>
-                <TextInput
-                    style={getInputStyle('email')}
-                    onFocus={() => setFocusedInput('email')}
-                    onBlur={() => setFocusedInput(null)}
-                    value={email}
-                    onChangeText={setEmail}
-                    keyboardType="email-address"
-                />
-            </View>
-            <View >
-                <Text style={{ fontSize: 15, color: '#333', fontWeight: 'bold' }}>Password</Text>
-                <TextInput
-                    style={getInputStyle('password')}
-                    onFocus={() => setFocusedInput('password')}
-                    onBlur={() => setFocusedInput(null)}
-                    value={password}
-                    onChangeText={setPassword}
-                    secureTextEntry={true}
-                    keyboardType="default"
-                />
-            </View>
+
+
             <TouchableOpacity style={{
                 backgroundColor: 'black',
                 padding: 15,
@@ -191,7 +188,7 @@ const SignIn = () => {
                     <Text style={{ fontSize: 16, color: 'blue', fontWeight: 'bold' }}>Sign up</Text>
                 </Link>
             </View>
-        </KeyboardAwareScrollView>
+        </View>
     );
 }
 
@@ -201,7 +198,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 25,
         gap: 30,
         backgroundColor: '#fff',
-        justifyContent: 'flex-start',
+        justifyContent: 'space-evenly',
     },
     text: {
         fontSize: 20,

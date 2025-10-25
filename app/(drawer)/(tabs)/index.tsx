@@ -13,7 +13,7 @@ import { categories } from '../../(modal)/CategoryModal'
 import { MaterialCommunityIcons } from '@expo/vector-icons'
 
 // Floating button component
-function FloatingAIButton() {
+export function FloatingAIButton() {
   const [open, setOpen] = useState(false);
 
   return (

@@ -33,7 +33,7 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
           source={{ uri: user?.photoURL || fallbacksIntialUrls(profile?.firstName, profile?.lastName) }} // temporary avatar
           style={{ width: 80, height: 80, borderRadius: 40, marginBottom: 10 }}
         />
-        <Text style={{ fontSize: 18, fontWeight: "600" }}>{profile?.firstName + "" + profile?.lastName}</Text>
+        <Text style={{ fontSize: 18, fontWeight: "600" }}>{profile?.firstName + " " + profile?.lastName}</Text>
         <Text style={{ fontSize: 14, color: "gray" }}>{profile?.email}</Text>
       </View>
 
