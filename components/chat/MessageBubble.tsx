@@ -13,22 +13,23 @@ interface MessageBubbleProps {
   message: Message;
 }
 
+export const renderTypingIndicator = () => (
+  <View style={styles.typingContainer}>
+    <Text style={styles.typingText}>Bot is typing...</Text>
+    <View style={styles.typingDots}>
+      <Animated.View style={[styles.dot, { animationDelay: '0ms' }]} />
+      <Animated.View style={[styles.dot, { animationDelay: '200ms' }]} />
+      <Animated.View style={[styles.dot, { animationDelay: '400ms' }]} />
+    </View>
+  </View>
+);
+
 export default function MessageBubble({ message }: MessageBubbleProps) {
   const formatTime = (date: Date) => {
     const timestamp = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return timestamp
   };
 
-  const renderTypingIndicator = () => (
-    <View style={styles.typingContainer}>
-      <Text style={styles.typingText}>Bot is typing...</Text>
-      <View style={styles.typingDots}>
-        <Animated.View style={[styles.dot, { animationDelay: '0ms' }]} />
-        <Animated.View style={[styles.dot, { animationDelay: '200ms' }]} />
-        <Animated.View style={[styles.dot, { animationDelay: '400ms' }]} />
-      </View>
-    </View>
-  );
 
   return (
     <View
