@@ -12,6 +12,7 @@ import AddExpenseModal from "./create";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import SplashScreen from "@/components/SplashScreen";
 import useAuthStore from "@/store/useAuthStore";
+import { StatusBar } from "expo-status-bar";
 
 function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
     return (
@@ -111,6 +112,7 @@ export default function TabLayout() {
 
     return (
         <BottomSheetModalProvider>
+            
             <Tabs
                 screenOptions={{
                     headerShown: false,

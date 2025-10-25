@@ -1,8 +1,8 @@
 import useExpenseStore from '@/store/useExpenseStore';
 import { getDeviceCurrencySymbol } from '@/util/lib';
 import { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
-import { categories } from '../(modal)/CategoryModal';
+import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { categories } from '../../(modal)/CategoryModal';
 
 
 
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 15,
-    backgroundColor: "#f5eaeaff",
+    backgroundColor: "#f0f0f0ff",
     gap: 15,
   },
   header: {

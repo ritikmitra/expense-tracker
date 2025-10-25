@@ -13,7 +13,7 @@ export default function SplashScreen() {
     <View
       style={styles.container}
     >
-      <StatusBar style="dark" />
+      <StatusBar style="light" />
       <Image source={require("@/assets/images/get-started.svg")} style={styles.image} />
       <Text style={styles.mainText}>Effortless financial management at your fingertips</Text>
       <TouchableOpacity style={styles.button} onPress={() => router.push("/(auth)/sign-in")}>

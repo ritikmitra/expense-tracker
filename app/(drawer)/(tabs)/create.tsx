@@ -1,9 +1,9 @@
-import { View, Text, StyleSheet, TouchableOpacity, TextInput, Platform, Modal } from 'react-native'
-import React, { useState } from 'react'
+import useExpenseStore from '@/store/useExpenseStore';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import CategoryModal, { categories } from '../(modal)/CategoryModal';
-import useExpenseStore from '@/store/useExpenseStore';
+import React, { useState } from 'react';
+import { Modal, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import CategoryModal, { categories } from '../../(modal)/CategoryModal';
 
 
 const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<React.SetStateAction<boolean>> }) => {
@@ -26,7 +26,7 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
 
   const handleAddExpense = () => {
 
-    
+
     if (!amount || !description || !selectedCategory) {
       alert('Please fill all fields');
       return;
@@ -58,8 +58,8 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
   };
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={() => setModalVisible(false)}>
-        <MaterialIcons name='cancel' size={24} style={{ marginBottom: 10 }} />
+      <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginBottom: 10 , width : 25}} >
+        <MaterialIcons name='cancel' size={24} />
       </TouchableOpacity>
       <Text style={styles.headerTitle}>Add new Expense</Text>
       <Text style={styles.headerDescription}>
