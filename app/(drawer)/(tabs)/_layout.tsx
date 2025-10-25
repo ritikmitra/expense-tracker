@@ -1,4 +1,4 @@
-import { useRouter, Tabs } from "expo-router";
+import { Tabs } from "expo-router";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
     View,
@@ -10,9 +10,9 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useState } from "react";
 import AddExpenseModal from "./create";
 import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
-import SplashScreen from "@/components/SplashScreen";
 import useAuthStore from "@/store/useAuthStore";
-import { StatusBar } from "expo-status-bar";
+import SignIn from "@/app/(auth)/sign-in";
+
 
 function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
     return (
@@ -100,19 +100,16 @@ function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
 export default function TabLayout() {
     const [modalVisible, setModalVisible] = useState(false);
 
-    const { initAuth, user, loading } = useAuthStore();
-
+    const { initAuth, user } = useAuthStore();
     useEffect(() => {
         initAuth(); // 👈 subscribe to Firebase Auth
     }, [initAuth]);
 
-    if (loading) return <SplashScreen />; // Show splash while Firebase checks auth
-    if (!user) return <SplashScreen />; // Or redirect to login if user is null
-
+    if (!user) return <SignIn />; // Or redirect to login if user is null
 
     return (
         <BottomSheetModalProvider>
-            
+
             <Tabs
                 screenOptions={{
                     headerShown: false,

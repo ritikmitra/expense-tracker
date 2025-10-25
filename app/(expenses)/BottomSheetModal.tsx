@@ -9,8 +9,6 @@ import { formatDate, getDeviceCurrencySymbol } from '@/util/lib';
 import BlurredBackground from '@/components/BlurredBackground';
 import { FontAwesome5, MaterialCommunityIcons } from '@expo/vector-icons';
 import useExpenseStore from '@/store/useExpenseStore';
-import useAuthStore from '@/store/useAuthStore';
-import { signOutFromGoogle } from "@/util/googleAuth"
 import ExpenseEditModal from '../(modal)/ExpenseEditModal';
 
 interface ExpenseBottomSheetProps {
@@ -31,7 +29,6 @@ const ExpenseBottomSheet = forwardRef<BottomSheetModal, ExpenseBottomSheetProps>
 
         const headerHeight = useHeaderHeight()
 
-        const { logout } = useAuthStore()
 
         const deleteExpenseAndCloseSheet = (expenseId: string) => {
             deleteExpense(expenseId)

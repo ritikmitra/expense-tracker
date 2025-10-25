@@ -157,3 +157,7 @@ export const fallbacksIntialUrls = (firstName?: string, lastName?: string) => {
 
     return `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=${background}&color=${text}`
   }
+
+export const generateUniqueId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+
+

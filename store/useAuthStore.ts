@@ -1,6 +1,7 @@
 import { auth, db } from "@/config/firebaseConfig";
 import {
   createUserWithEmailAndPassword,
+  GithubAuthProvider,
   GoogleAuthProvider,
   onAuthStateChanged,
   signInWithCredential,
@@ -19,6 +20,7 @@ type AuthStore = {
   signUp: (email: string, password: string, firstName: string, lastName: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   signInWithGoogle: (idToken: string) => Promise<void>;
+  signInWithGithub : (access_token : string) => Promise<void>
   logout: () => Promise<void>;
   initAuth: () => void;
   fetchProfile: () => Promise<void>;
@@ -79,6 +81,39 @@ const useAuthStore = create<AuthStore>((set, get) => ({
       await get().fetchProfile();
     } catch (error) {
       console.error("Google sign-in error:", error);
+      throw error;
+    }
+  },
+
+  signInWithGithub : async (access_token : string) => {
+      try {
+      const credential = GithubAuthProvider.credential(access_token);
+      const result = await signInWithCredential(auth, credential);
+      const user = result.user;
+
+      // Check if user profile exists in Firestore
+      const userDoc = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userDoc);
+
+      if (!userSnap.exists()) {
+        // Create new user profile if it doesn't exist
+        const displayName = user.displayName || "";
+        const nameParts = displayName.split(" ");
+        const firstName = nameParts[0] || "";
+        const lastName = nameParts.slice(1).join(" ") || "";
+
+        await setDoc(userDoc, {
+          firstName,
+          lastName,
+          email: user.email,
+          createdAt: new Date().toISOString(),
+        });
+      }
+
+      set({ user });
+      await get().fetchProfile();
+    } catch (error) {
+      console.error("Github sign-in error:", error);
       throw error;
     }
   },

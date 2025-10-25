@@ -9,6 +9,11 @@ export default function SplashScreen() {
 
   const router = useRouter();
 
+  const handleGetStarted = async () => {
+    router.push("/(auth)/sign-in"); // Navigate to sign-in page
+  };
+
+
   return (
     <View
       style={styles.container}
@@ -16,7 +21,7 @@ export default function SplashScreen() {
       <StatusBar style="light" />
       <Image source={require("@/assets/images/get-started.svg")} style={styles.image} />
       <Text style={styles.mainText}>Effortless financial management at your fingertips</Text>
-      <TouchableOpacity style={styles.button} onPress={() => router.push("/(auth)/sign-in")}>
+      <TouchableOpacity style={styles.button} onPress={handleGetStarted}>
         <Text style={styles.text}>Get Started</Text>
         <Ionicons name="arrow-forward-circle" size={24} color="white" />
       </TouchableOpacity>
