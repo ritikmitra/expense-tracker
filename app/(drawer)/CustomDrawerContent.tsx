@@ -13,8 +13,6 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
 
   const { profile, user, logout } = useAuthStore()
 
-  
-
   return (
     <DrawerContentScrollView
       {...props}
@@ -53,26 +51,12 @@ export default function CustomDrawerContent(props: DrawerContentComponentProps) 
           )}
           onPress={() => props.navigation.navigate("about")}
         />
-        {/* <DrawerItem
+        <DrawerItem
           label="Chat"
           icon={({ color, size }) => (
             <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
           )}
           onPress={() => props.navigation.navigate("chat")}
-        />
-        <DrawerItem
-          label="Chatbox"
-          icon={({ color, size }) => (
-            <Ionicons name="chatbubble-ellipses-sharp" color={color} size={size} />
-          )}
-          onPress={() => props.navigation.navigate("chatbox")}
-        /> */}
-        <DrawerItem
-          label="Chat"
-          icon={({ color, size }) => (
-            <Ionicons name="chatbubble-ellipses-outline" color={color} size={size} />
-          )}
-          onPress={() => props.navigation.navigate("giftedchatbox")}
         />
       </View>
 

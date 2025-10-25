@@ -31,7 +31,7 @@ export default function ChatScreen({ initialMessages = [], onSendMessage, setLoa
         };
     }, []);
 
-    const handleKeyboardShow = (event) => {
+    const handleKeyboardShow = (event: any) => {
 
         setTimeout(() => {
             flatListRef.current?.scrollToEnd({ animated: true })
@@ -44,7 +44,7 @@ export default function ChatScreen({ initialMessages = [], onSendMessage, setLoa
         flatListRef.current?.scrollToEnd({ animated: false });
     }, [])
 
-    const handleKeyboardHide = (event) => {
+    const handleKeyboardHide = (event: any) => {
         setIsKeyboardVisible(false);
     };
 
@@ -115,6 +115,7 @@ export default function ChatScreen({ initialMessages = [], onSendMessage, setLoa
             style={styles.container}
             behavior={Platform.OS === 'ios' ? 'padding' : undefined}
             keyboardVerticalOffset={headerHeight}
+            enabled={isKeyboardVisible}
         >
             <View style={styles.messagesContainer}>
                 <FlatList
