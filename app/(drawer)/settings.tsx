@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Pressable, ScrollView, StyleProp, TextStyle } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, StyleProp, TextStyle, Platform , useColorScheme,Appearance} from 'react-native';
 import { useState } from 'react';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from 'expo-router';
@@ -6,13 +6,27 @@ import { Switch } from 'react-native-switch';
 
 const Settings = () => {
   const navigation = useNavigation();
+  const colorScheme = useColorScheme()
   const [notification, setNotification] = useState(false);
   const [theme, setTheme] = useState(false);
   const [haptics, setHaptics] = useState(false);
+  const [scheme,setScheme] = useState(colorScheme)
+
+  function toggleColorScheme() {
+    if (Platform.OS !== "web") {
+      const newScheme = scheme === 'dark' ? 'light' : 'dark'
+      Appearance.setColorScheme(newScheme)
+      setScheme(newScheme)
+    }
+  }
+
+  function setThemes(){
+    toggleColorScheme()
+    setTheme(!theme)
+  }
 
   return (
     <View style={styles.container}>
-      {/* HEADER */}
       <View style={styles.headerContainer}>
         <Pressable onPress={() => navigation.goBack()} style={styles.backButton}>
           <MaterialIcons name="arrow-back-ios-new" size={22} color="#000" />
@@ -35,7 +49,7 @@ const Settings = () => {
             icon={theme ? "light-mode" : "dark-mode"}
             label="Dark Theme"
             value={theme}
-            onValueChange={setTheme}
+            onValueChange={setThemes}
           />
         </View>
 
