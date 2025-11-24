@@ -64,7 +64,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
 
       if (!userSnap.exists()) {
         // Create new user profile if it doesn't exist
-        const displayName = user.displayName || "";
+        const displayName = user.displayName ?? "";
         const nameParts = displayName.split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";
@@ -97,7 +97,7 @@ const useAuthStore = create<AuthStore>((set, get) => ({
 
       if (!userSnap.exists()) {
         // Create new user profile if it doesn't exist
-        const displayName = user.displayName || "";
+        const displayName = user.displayName ?? "";
         const nameParts = displayName.split(" ");
         const firstName = nameParts[0] || "";
         const lastName = nameParts.slice(1).join(" ") || "";

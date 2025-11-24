@@ -1,5 +1,6 @@
 import * as  SecureStore from "expo-secure-store"
 import * as Localization from "expo-localization";
+import * as Crypto from 'expo-crypto';
 
 export function currentGreeting() {
     const date = new Date()
@@ -89,7 +90,7 @@ export function getCurrency(currency: string): string {
         // Example: "€100" → take the first/last non-numeric char
         const parts = formatter.formatToParts(100);
         const symbol = parts.find(p => p.type === "currency")?.value;
-        return symbol || "¤"; // fallback generic
+        return symbol ?? "¤"; // fallback generic
     } catch {
         return "¤"; // fallback if currency not supported
     }
@@ -135,9 +136,9 @@ function getAvatarColors(name : string) {
   }
 
   // Convert hex to RGB for contrast calculation
-  const r = parseInt(bgColor.slice(0, 2), 16);
-  const g = parseInt(bgColor.slice(2, 4), 16);
-  const b = parseInt(bgColor.slice(4, 6), 16);
+  const r = Number.parseInt(bgColor.slice(0, 2), 16);
+  const g = Number.parseInt(bgColor.slice(2, 4), 16);
+  const b = Number.parseInt(bgColor.slice(4, 6), 16);
 
   // Calculate luminance
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b);
@@ -158,6 +159,5 @@ export const fallbacksIntialUrls = (firstName?: string, lastName?: string) => {
     return `https://ui-avatars.com/api/?name=${firstName}+${lastName}&background=${background}&color=${text}`
   }
 
-export const generateUniqueId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 
-
+export const generateUniqueId = () =>  Crypto.randomUUID();

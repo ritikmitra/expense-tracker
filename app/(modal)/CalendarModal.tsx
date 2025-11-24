@@ -124,17 +124,17 @@ const CalendarModal = ({
         // Create an object where keys are date strings like "2025-08-18"
         const marks: Record<string, any> = {};
 
-        expenses.forEach((expense) => {
+        for (const expense of expenses) {
             const date = expense.date.split("T")[0]; // ensure format YYYY-MM-DD
             if (!marks[date]) {
                 marks[date] = { marked: true, dotColor: 'red' }; // first expense for this day
             }
-        });
+        }
 
         // add currently selected day styling
         if (selected) {
             marks[selected] = {
-                ...(marks[selected] || {}),
+                ...marks[selected],
                 selected: true,
                 disableTouchEvent: true,
                 selectedColor: 'black',

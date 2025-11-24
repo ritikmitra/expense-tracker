@@ -1,6 +1,6 @@
 import { db } from '@/config/firebaseConfig';
 import { secureStorage } from '@/util/lib';
-import { addDoc, collection, deleteDoc, doc, getDoc, getDocs, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
+import {  collection, deleteDoc, doc, getDocs, orderBy, query, setDoc, updateDoc } from 'firebase/firestore';
 import { nanoid } from 'nanoid/non-secure';
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';

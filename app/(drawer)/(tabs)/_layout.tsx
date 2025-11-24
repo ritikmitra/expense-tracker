@@ -94,8 +94,6 @@ function CustomTabBar({ state, descriptors, navigation, onCreatePress }: any) {
     );
 }
 
-
-
 // 👇 This is your actual layout function
 export default function TabLayout() {
     const [modalVisible, setModalVisible] = useState(false);
@@ -117,6 +115,7 @@ export default function TabLayout() {
                 tabBar={(props) => (
                     <CustomTabBar {...props} onCreatePress={() => setModalVisible(true)} />
                 )}
+                key="bottom"
             >
                 <Tabs.Screen
                     name="index"

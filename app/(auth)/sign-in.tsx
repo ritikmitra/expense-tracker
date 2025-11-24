@@ -54,7 +54,7 @@ const SignIn = () => {
             // Use native Google Sign-In
             const result = await googleSignIn();
 
-            if (result && result.idToken) {
+            if (result.idToken) {
                 // Sign in with Firebase using the ID token
                 await signInWithGoogle(result.idToken);
                 router.replace("/(drawer)/(tabs)");

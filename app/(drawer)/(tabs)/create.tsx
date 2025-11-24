@@ -32,8 +32,8 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
       return;
     }
 
-    const parsedAmount = parseFloat(amount);
-    if (isNaN(parsedAmount) || parsedAmount <= 0) {
+    const parsedAmount = Number.parseFloat(amount);
+    if (Number.isNaN(parsedAmount) || parsedAmount <= 0) {
       alert('Amount must be a valid number');
       return;
     }
@@ -94,7 +94,7 @@ const AddExpenseModal = ({ setModalVisible }: { setModalVisible: React.Dispatch<
           onPress={() => setCategoryModalVisible(true)}
         >
           <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-            {selectedCategory &&
+            {selectedCategory !== ''  &&
               <Text>{categories.find((category) => category.name === selectedCategory)?.emoji}</Text>
             }
             <Text style={{ color: selectedCategory ? '#000' : '#999' }}>

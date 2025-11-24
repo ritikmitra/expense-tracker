@@ -13,7 +13,7 @@ interface ChatScreenProps {
     setLoading: (value: boolean) => void;
 }
 
-export default function ChatScreen({ initialMessages = [], onSendMessage, setLoading }: ChatScreenProps) {
+export default function ChatScreen({ initialMessages = [], onSendMessage, setLoading }: Readonly<ChatScreenProps>) {
     const [messages, setMessages] = useState<Message[]>(initialMessages);
     const flatListRef = useRef<FlatList>(null);
     const headerHeight = useHeaderHeight();

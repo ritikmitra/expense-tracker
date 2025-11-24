@@ -95,16 +95,18 @@ const Index = () => {
       switch (activeFilter) {
         case 'Today':
           return expenseDate >= today
-        case 'This Week':
+        case 'This Week': {
           const startOfWeek = new Date(today)
           startOfWeek.setDate(today.getDate() - today.getDay())
           const endOfWeek = new Date(startOfWeek)
           endOfWeek.setDate(startOfWeek.getDate() + 7)
           return expenseDate >= startOfWeek && expenseDate < endOfWeek
-        case 'This Month':
+        }
+        case 'This Month':{
           const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
           const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1)
           return expenseDate >= startOfMonth && expenseDate < endOfMonth
+        }
         default:
           return expenseDate >= today
       }
@@ -122,12 +124,13 @@ const Index = () => {
     switch (activeFilter) {
       case 'Today':
         return `Today, ${currentDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-      case 'This Week':
+      case 'This Week': {
         const startOfWeek = new Date(currentDate)
         startOfWeek.setDate(currentDate.getDate() - currentDate.getDay())
         const endOfWeek = new Date(startOfWeek)
         endOfWeek.setDate(startOfWeek.getDate() + 6)
         return `This Week (${startOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${endOfWeek.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })})`
+      }
       case 'This Month':
         return `${currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}`
       default:
@@ -140,8 +143,8 @@ const Index = () => {
       <StatusBar style="dark" />
       <View style={styles.header}>
         <View>
-          <Pressable android_ripple={{ color: "#ccc",radius : 30,borderless : true,foreground : true }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
-            <Image source={{ uri: user?.photoURL || fallbacksIntialUrls(profile?.firstName, profile?.lastName) }} style={styles.headerImg} />
+          <Pressable android_ripple={{ color: "#ccc", radius: 30, borderless: true, foreground: true }} onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+            <Image source={{ uri: user?.photoURL ?? fallbacksIntialUrls(profile?.firstName, profile?.lastName) }} style={styles.headerImg} />
           </Pressable>
         </View>
         <View style={styles.innerHeader}>

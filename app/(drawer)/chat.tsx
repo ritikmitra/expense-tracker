@@ -24,6 +24,92 @@ You can ask me things like:
 Let's make tracking your spending simple and smart! 🚀
 `;
 
+const RenderAnimatedBubble = (props: any) => {
+    const animation = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.spring(animation, {
+            toValue: 1,
+            friction: 6,
+            tension: 70,
+            useNativeDriver: true,
+        }).start();
+    }, [animation]);
+
+    const translateY = animation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [20, 0], // slides up from below
+    });
+
+    const scale = animation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0.95, 1], // slightly “pops” into place
+    });
+
+    return (
+        <Animated.View
+            style={{
+                transform: [{ translateY }, { scale }],
+            }}
+        >
+            <Bubble
+                {...props}
+                wrapperStyle={{
+                    left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 },
+                    right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 },
+                }}
+                textStyle={{
+                    left: { color: '#111827' },
+                    right: { color: '#fff' },
+                }}
+            />
+        </Animated.View>
+    );
+};
+
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const RenderAnimatedMessage = (props: any) => {
+    const AnimatedView = Animated.createAnimatedComponent(View);
+
+    const animation = useRef(new Animated.Value(0)).current;
+
+    useEffect(() => {
+        Animated.timing(animation, {
+            toValue: 1,
+            duration: 300,
+            useNativeDriver: true,
+        }).start();
+    }, [animation]);
+
+    const translateY = animation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [10, 0], // slide up from below
+    });
+
+
+    return (
+        <AnimatedView
+            style={{
+                opacity: animation,
+                transform: [{ translateY }],
+            }}
+        >
+            <Bubble
+                {...props}
+                wrapperStyle={{
+                    left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 },
+                    right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 },
+                }}
+                textStyle={{
+                    left: { color: '#111827' },
+                    right: { color: '#fff' },
+                }}
+            />
+        </AnimatedView>
+    );
+};
+
 export default function Chat() {
     const [messages, setMessages] = useState<IMessage[]>([]);
     const navigate = useNavigation();
@@ -213,91 +299,9 @@ export default function Chat() {
         );
     };
 
-    const AnimatedView = Animated.createAnimatedComponent(View);
-
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const RenderAnimatedMessage = (props: any) => {
-
-        const animation = useRef(new Animated.Value(0)).current;
-
-        useEffect(() => {
-            Animated.timing(animation, {
-                toValue: 1,
-                duration: 300,
-                useNativeDriver: true,
-            }).start();
-        }, [animation]);
-
-        const translateY = animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [10, 0], // slide up from below
-        });
 
 
-        return (
-            <AnimatedView
-                style={{
-                    opacity: animation,
-                    transform: [{ translateY }],
-                }}
-            >
-                <Bubble
-                    {...props}
-                    wrapperStyle={{
-                        left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 },
-                        right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 },
-                    }}
-                    textStyle={{
-                        left: { color: '#111827' },
-                        right: { color: '#fff' },
-                    }}
-                />
-            </AnimatedView>
-        );
-    };
 
-    const RenderAnimatedBubble = (props: any) => {
-        const animation = useRef(new Animated.Value(0)).current;
-
-        useEffect(() => {
-            Animated.spring(animation, {
-                toValue: 1,
-                friction: 6,
-                tension: 70,
-                useNativeDriver: true,
-            }).start();
-        }, [animation]);
-
-        const translateY = animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [20, 0], // slides up from below
-        });
-
-        const scale = animation.interpolate({
-            inputRange: [0, 1],
-            outputRange: [0.95, 1], // slightly “pops” into place
-        });
-
-        return (
-            <Animated.View
-                style={{
-                    transform: [{ translateY }, { scale }],
-                }}
-            >
-                <Bubble
-                    {...props}
-                    wrapperStyle={{
-                        left: { backgroundColor: '#fff', borderBottomLeftRadius: 4, marginVertical: 8 },
-                        right: { backgroundColor: '#2563eb', borderBottomRightRadius: 4, marginVertical: 8 },
-                    }}
-                    textStyle={{
-                        left: { color: '#111827' },
-                        right: { color: '#fff' },
-                    }}
-                />
-            </Animated.View>
-        );
-    };
 
 
     return (

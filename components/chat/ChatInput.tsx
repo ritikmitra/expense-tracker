@@ -7,7 +7,7 @@ interface ChatInputProps {
   placeholder?: string;
 }
 
-export default function ChatInput({ onSend, placeholder = 'Type a message...' }: ChatInputProps) {
+export default function ChatInput({ onSend, placeholder = 'Type a message...' }: Readonly<ChatInputProps>) {
   const [text, setText] = useState('');
 
   const handleSend = () => {

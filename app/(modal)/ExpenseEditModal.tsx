@@ -17,7 +17,7 @@ export default function ExpenseEditModal({
   ExpenseDetailsProps,
   setExpenseEditModal,
 }: {
-  ExpenseDetailsProps: Expense | null;
+  ExpenseDetailsProps: Readonly<Expense> | null;
   setExpenseEditModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
   const updateExpense = useExpenseStore((state) => state.modifyExpense);
@@ -38,16 +38,15 @@ export default function ExpenseEditModal({
   }, [ExpenseDetailsProps]);
 
   const handleSave = () => {
-    if (!ExpenseDetailsProps) return;
-     updateExpense(ExpenseDetailsProps.id, {
-      description,
-      amount: parseFloat(amount),
-      category : selectedCategory,
-      date: ExpenseDetailsProps.date,
-    });
-    
+    if (ExpenseDetailsProps) {
+      updateExpense(ExpenseDetailsProps.id, {
+        description,
+        amount: parseFloat(amount),
+        category: selectedCategory,
+        date: ExpenseDetailsProps.date,
+      });
+    }
     setExpenseEditModal(false);
-    
   };
 
   return (
@@ -90,7 +89,7 @@ export default function ExpenseEditModal({
             onPress={() => setCategoryModalVisible(true)}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
-              {selectedCategory &&
+              {selectedCategory !== '' &&
                 <Text>{categories.find((category) => category.name === selectedCategory)?.emoji}</Text>
               }
               <Text style={{ color: selectedCategory ? '#000' : '#999' }}>

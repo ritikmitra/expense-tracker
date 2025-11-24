@@ -24,7 +24,7 @@ export const renderTypingIndicator = () => (
   </View>
 );
 
-export default function MessageBubble({ message }: MessageBubbleProps) {
+export default function MessageBubble({ message }: Readonly<MessageBubbleProps>) {
   const formatTime = (date: Date) => {
     const timestamp = new Date(date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return timestamp
